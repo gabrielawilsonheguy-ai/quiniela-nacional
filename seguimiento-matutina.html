@@ -31,7 +31,7 @@ thead th{position:sticky;top:0;background:var(--navy);color:#fff;z-index:2;font-
 th.pos,td.pos{position:sticky;left:0;background:var(--card);font-weight:700;z-index:1}
 thead th.pos{background:var(--navy);color:var(--gold);z-index:3}
 th.fin,td.fin{background:#FBF3D9;font-weight:700;padding:0 4px}
-.f1{width:58px;min-width:58px;max-width:58px}.f3{width:130px;min-width:130px;max-width:130px}.f2{width:84px;min-width:84px;max-width:84px}
+.f1{width:58px;min-width:58px;max-width:58px}.f4{width:50px;min-width:50px;max-width:50px}.f3{width:130px;min-width:130px;max-width:130px}.f2{width:84px;min-width:84px;max-width:84px}
 thead th.fin{white-space:normal}
 thead th.fin{background:var(--gold);color:var(--navy);z-index:2}
 td.fin{position:sticky;z-index:1}
@@ -70,7 +70,7 @@ td.hi,tr.hl td.hi,td.old.hi{background:var(--gold)!important;color:var(--navy)!i
 .tur .btn small{font-size:10px;opacity:.7}.tur .btn.on small{opacity:.85}
 .tur .bd{display:inline-block;margin-left:6px;background:#F4A340;color:#4A2300;border-radius:9px;padding:0 6px;font:700 11px sans-serif;font-style:normal}
 </style></head><body>
-<header><div><h1>Seguimiento · Matutina <span style="font-weight:400;font-size:13px">15:00</span></h1><small>Unidades: dígito más demorado por fila · cuadrado = salió el que se esperaba · tocá una celda para marcarla · naranja = en Análisis (67 sorteos sin salir) · se actualiza sola</small></div><label style="margin-left:auto;font-size:12px;color:#fff;cursor:pointer;white-space:nowrap;background:#2c3e66;border:1px solid #C9A84C;border-radius:8px;padding:5px 9px"><input type="checkbox" id="r3" style="vertical-align:-2px"> Aplicar regla 3</label><a class="btn" href="index.html" style="text-decoration:none">‹ Inicio</a><a class="btn" href="analisis-beta.html" style="text-decoration:none">β Análisis Beta ›</a><a class="btn" href="jugadas.html" style="text-decoration:none">$ Jugadas</a><button class="btn" id="sy-btn">☁ Sincronizar</button></header>
+<header><div><h1>Seguimiento · Matutina <span style="font-weight:400;font-size:13px">15:00</span></h1><small>Unidades: dígito más demorado por fila · cuadrado = salió el que se esperaba · tocá una celda para marcarla · naranja = en Análisis (entra 5 sorteos antes de Y mín, o a los 67 sorteos sin salir, según el selector) · se actualiza sola</small></div><label style="margin-left:auto;font-size:12px;color:#fff;cursor:pointer;white-space:nowrap;background:#2c3e66;border:1px solid #C9A84C;border-radius:8px;padding:5px 9px"><input type="checkbox" id="r3" style="vertical-align:-2px"> Aplicar regla 3</label><label style="margin-left:6px;font-size:12px;color:#fff;white-space:nowrap;background:#2c3e66;border:1px solid #C9A84C;border-radius:8px;padding:5px 9px">Entrada a Análisis <select id="ent" style="font-size:12px;border-radius:6px"><option value="B">5 sorteos antes de Y mín</option><option value="A">67 sorteos sin salir</option></select></label><a class="btn" href="index.html" style="text-decoration:none">‹ Inicio</a><a class="btn" href="analisis-beta.html" style="text-decoration:none">β Análisis Beta ›</a><a class="btn" href="jugadas.html" style="text-decoration:none">$ Jugadas</a><button class="btn" id="sy-btn">☁ Sincronizar</button></header>
 <div id="sync" class="wrap" hidden style="padding-bottom:0"><div class="card" style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px">
  <div id="sy-off"><div class="tb"><div style="flex:2;min-width:230px"><label>Dirección de la base (Firebase)</label><input id="sy-url" placeholder="https://xxxx-default-rtdb.firebaseio.com" style="width:100%;font-size:13px;padding:5px"></div>
  <div style="flex:2;min-width:200px"><label>Código secreto (el mismo en todos tus aparatos)</label><input id="sy-code" placeholder="pegá el código" style="width:100%;font-size:13px;padding:5px"></div>
@@ -114,7 +114,7 @@ function rows(f){const a=data.slice();return SX(f).newest?a.reverse():a}
 function fill(f){document.querySelector(`[data-f=${f}][data-a=ord]`).textContent=SX(f).newest?"Más nueva a la izquierda":"Más nueva a la derecha"}
 function build(f){const r=rows(f),c=SX(f),SG=Array.from({length:20},(_,i)=>seguimiento(i,f));
  let h='<table><thead><tr><th class="pos">Pos</th>'+r.map(x=>`<th>${x.f.slice(0,5)}<br>${x.f.slice(6)}</th>`).join("")+
-  '<th class="fin f1" style="right:214px">Dígito</th><th class="fin f2" style="right:130px">Sorteos sin salir</th><th class="fin f3" style="right:0">Estado</th>'+'</tr></thead><tbody>';
+  '<th class="fin f1" style="right:314px">Dígito</th><th class="fin f2" style="right:230px">Sorteos sin salir</th><th class="fin f4" style="right:180px">Y mín</th><th class="fin f4" style="right:130px">Y máx</th><th class="fin f3" style="right:0">Estado</th>'+'</tr></thead><tbody>';
  for(let i=0;i<20;i++){
   const sg=SG&&SG[i];
   h+=`<tr${HL[f]===i?' class="hl"':''}><td class="pos${sg&&sg.ana?' ana':''}" data-f="${f}" data-p="${i}">${String(i+1).padStart(2,"0")}</td>`+r.map(x=>{const d=x[f][i],id=x.k+"|"+i;
@@ -126,7 +126,7 @@ function build(f){const r=rows(f),c=SX(f),SG=Array.from({length:20},(_,i)=>segui
     if(sg.kDiag&&x.k===sg.kDiag){cls+=" diag";inner=`<svg viewBox="0 0 10 10" preserveAspectRatio="none"><line x1="0" y1="10" x2="10" y2="0"/></svg>${inner}`}}
    if(c.marks.includes(id))cls+=" hi";
    return `<td class="${cls}" data-f="${f}" data-m="${id}">${inner}</td>`}).join("");
-  h+=(sg?`<td class="fin f1${sg.ana?' ana':''}" style="right:214px">${sg.dig}</td><td class="fin f2${sg.ana?' ana':''}" style="right:130px">${sg.gap}</td><td class="fin f3 ${sg.sal?'sal':(sg.ana?'ana':(sg.proc?'prc':'bus'))}" style="right:0">${sg.estado}</td>`:`<td class="fin f1" style="right:214px"></td><td class="fin f2" style="right:130px"></td><td class="fin f3" style="right:0"></td>`);
+  h+=(sg?`<td class="fin f1${sg.ana?' ana':''}" style="right:314px">${sg.dig}</td><td class="fin f2${sg.ana?' ana':''}" style="right:230px">${sg.gap}</td><td class="fin f4${sg.ana?' ana':''}" style="right:180px">${sg.v1!==undefined?sg.v1:(sg.cancR?"✕":"")}</td><td class="fin f4${sg.ana?' ana':''}" style="right:130px">${sg.v2!==undefined?sg.v2:(sg.cancR?"✕":"")}</td><td class="fin f3 ${sg.sal?'sal':(sg.ana?'ana':(sg.proc?'prc':'bus'))}" style="right:0">${sg.estado}</td>`:`<td class="fin f1" style="right:314px"></td><td class="fin f2" style="right:230px"></td><td class="fin f4" style="right:180px"></td><td class="fin f4" style="right:130px"></td><td class="fin f3" style="right:0"></td>`);
   h+='</tr>'}
  h+='</tbody></table>';$("t"+f).innerHTML=h;$("n-"+f).textContent=r.length;if(!c.newest)$("t"+f).scrollLeft=$("t"+f).scrollWidth}
 // Cada planilla ocupa una pantalla: las 20 posiciones se ven completas, sin scroll interno.
@@ -183,7 +183,7 @@ $("sy-info").onclick=()=>{const Y=gY();if(!Y)return;prompt("1 de 2 · Copiá la 
 $("sy-out").onclick=()=>{if(confirm("¿Desconectar? Las marcas siguen en este aparato y en la nube.")){st(YK,"null");yui()}};
 yui();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)ypull()});setInterval(()=>{if(!document.hidden)ypull()},45000);
-$("r3").checked=LN.reglas.r3;$("r3").onchange=()=>{LN.setR3($("r3").checked);render()};
+$("r3").checked=LN.reglas.r3;$("r3").onchange=()=>{LN.setR3($("r3").checked);render()};$("ent").value=LN.reglas.ent;$("ent").onchange=()=>{LN.setEnt($("ent").value);render()};
 cargar().then(ypull);
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>

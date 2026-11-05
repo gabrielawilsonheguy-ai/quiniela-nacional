@@ -1,9 +1,12 @@
 // Núcleo de Quiniela Nacional: 5 turnos, método α y β (Manual BETA). Una sola definición para las 3 apps.
 (function(){
 const LIM=67;
-const RK="lw:nac-reglas-v1",reglas={r3:false};
-try{const x=JSON.parse(localStorage.getItem(RK)||"null");if(x&&typeof x.r3==="boolean")reglas.r3=x.r3}catch(e){}
+const RK="lw:nac-reglas-v1",reglas={r3:false,ent:"B"};
+try{const x=JSON.parse(localStorage.getItem(RK)||"null");if(x&&typeof x.r3==="boolean")reglas.r3=x.r3;if(x&&(x.ent==="A"||x.ent==="B"))reglas.ent=x.ent}catch(e){}
 function setR3(v){reglas.r3=!!v;try{localStorage.setItem(RK,JSON.stringify(reglas))}catch(e){}}
+// Entrada a Análisis: "B" = 5 sorteos antes de Y mín (normal); "A" = LIM sorteos sin salir
+function setEnt(v){reglas.ent=v==="A"?"A":"B";try{localStorage.setItem(RK,JSON.stringify(reglas))}catch(e){}}
+const ANTES=5;
 const fmt=iso=>{const[a,b,c]=iso.split("-");return c+"/"+b+"/"+a};
 const ORD=["previa","primera","matutina","vespertina","nocturna"],HORA={previa:"10:15",primera:"12:00",matutina:"15:00",vespertina:"18:00",nocturna:"21:00"};
 const nom=k=>k.charAt(0).toUpperCase()+k.slice(1);
@@ -27,10 +30,12 @@ function analizar(ser){
  const vistos=[],D=[];let canc=null,amax=1;
  for(let y=1;y<=ser.length;y++){const d=ser[y-1];
   if(!vistos.includes(d)){vistos.push(d);const x=vistos.length,a=x===1?1:Math.log(y)/Math.log(x);
-   const it={y,d,x,a,rj:false};D.push(it);
+   const it={y,d,x,a,rj:false};let bb=null;{const N=x-1;if(N>=2){const S=y-1;if(S>D[N-1].y)bb={N,S,b:Math.log(S)/Math.log(N)}}}D.push(it);
    if(!canc){amax=Math.max(amax,a);
-    if(a>=2)canc={regla:1,txt:"α llegó a 2",y,it:[it]};
-    else if(a<1)canc={regla:2,txt:"α menor que 1",y,it:[it]};
+    if(bb&&bb.b>=2)canc={regla:1,txt:"β "+bb.N+" llegó a 2",y,it:[it],b:bb};
+    else if(bb&&bb.b<1)canc={regla:2,txt:"β menor que 1",y,it:[it],b:bb};
+    // (el α ya no cancela: por ahora solo cancela β ≥ 2; el α se muestra para comparar)
+    else if(y===8&&D.length===8)canc={regla:3,txt:"8 distintos en los 8 primeros sorteos",y,it:D.slice(-8)}
     else if(reglas.r3&&y===5&&D.length===5)canc={regla:3,txt:"5 distintos en los 5 primeros sorteos",y,it:D.slice(-5)}}}}
  if(canc)canc.it.forEach(z=>z.rj=true);
  const B=[];
@@ -41,15 +46,16 @@ function analizar(ser){
   if(A.bmax===null)A.sinB=true;
   else{const C=[A.bmax];let b=A.bmax;for(let k=0;k<3;k++){b=f2(b);C.push(b)}
    const Y=Math.min(100,Math.max(11,Math.ceil(Math.pow(10,b)-1e-9)));
-   A.cad=C;A.yraw=Math.pow(10,b);A.Y=Y;A.v1=Y-11;A.v2=Y-1}}
+   A.cad=C;A.yraw=Math.pow(10,b);A.Y=Y;A.v1=Y-10;A.v2=Y}}
  return A}
 function sim(data,i,f){
  f=f||"u";const n=data.length;
  if(n<2)return{R:null,ep:null,cer:[]};
- const last={},disc=new Set(),cer=[];let ep=null,sale=null;
+ const last={},disc=new Set(),cer=[],ac={};let ep=null,sale=null;
  const serie=(L,t)=>data.slice(L+1,t+1).map(x=>x[f][i]);
  for(let t=0;t<n;t++){
   const d=data[t][f][i];sale=null;
+  if(disc.has(d)){for(let k=cer.length-1;k>=0;k--){const c=cer[k];if(c.dig===d&&c.tipo!=="salio"&&!c.post){c.post={t,Ys:t-c.L,fecha:data[t].k};break}}}
   let cand=null;
   if(Object.keys(last).length===10){let m=Infinity;for(const x in last)if(!disc.has(x)&&last[x]<m){m=last[x];cand=x}}
   if(cand!==null&&d===cand){const Lp=last[cand];sale={t,dig:cand,Lp};
@@ -62,7 +68,13 @@ function sim(data,i,f){
     if(c===null)break;
     const L=last[c],gap=t-L;
     if(L>=t)break;
-    if(!ep&&gap>=LIM)ep={dig:c,L,arr:data[L+1].k,t0:t,f0:data[t].k};
+    if(!ep){
+     if(reglas.ent==="A"){if(gap>=LIM)ep={dig:c,L,arr:data[L+1].k,t0:t,f0:data[t].k}}
+     else{ // B: ya salieron los 9 distintos; entra 5 sorteos antes de Y mín
+      if(!ac[L])ac[L]=analizar(serie(L,t));
+      const A0=ac[L];
+      if(A0.canc){disc.add(c);continue}
+      if(A0.v1!==undefined&&gap>=A0.v1-ANTES)ep={dig:c,L,arr:data[L+1].k,t0:t,f0:data[t].k}}}
     if(!ep)break;
     const A=analizar(serie(L,t));
     if(A.canc||(A.v2!==undefined&&A.Yact>=A.v2)){
@@ -80,7 +92,10 @@ function sim(data,i,f){
    R={cierres:[],dig:c,gap:n-1-L,kDiag:data[L].k,kCirc:data[L+1].k,oldHasta:data[L].k,x:dist.size};
    if(seen<10||dist.size<9){R.estado="Búsqueda "+dist.size+"/10";R.proc=false}
    else if(ep&&ep.dig===c){R.estado="Análisis";R.ana=true}
-   else{R.estado="En proceso "+dist.size+"/10";R.proc=true}}}
+   else{R.estado="En proceso "+dist.size+"/10";R.proc=true}
+   if(seen>=10&&dist.size>=9){const A=analizar(serie(L,n-1));R.cancR=!!A.canc;
+    if(!A.canc&&A.v1!==undefined){R.v1=A.v1;R.v2=A.v2;R.Y=A.Y;
+     if(R.proc&&reglas.ent==="B"){const fa=A.v1-ANTES-R.gap;if(fa>0)R.estado="Entra en "+fa+" sort."}}}}}
  let epv=null;
  if(ep&&R&&R.ana)epv=Object.assign({},ep,{A:analizar(serie(ep.L,n-1))});
  const saleEp=cer.find(c=>c.tipo==="salio"&&c.t===n-1)||null;
@@ -106,5 +121,5 @@ function turBar(el,turnos,sel,onPick){
  const b=badges(turnos);
  el.innerHTML=turnos.map(t=>`<button class="btn${sel&&sel.id===t.id?' on':''}" data-t="${t.id}">${t.nombre}<small> ${t.hora}</small>${b[t.id]?`<i class="bd">${b[t.id]}</i>`:""}</button>`).join("");
  el.onclick=e=>{const x=e.target.closest("[data-t]");if(x){setTurno(x.dataset.t);onPick(x.dataset.t)}}}
-window.LN={LIM,reglas,setR3,fmt,parse,analizar,sim,seguimiento,apuesta,stakeY,STK,PAGA,load,pick,getTurno,setTurno,badges,turBar,URL_DATA};
+window.LN={LIM,ANTES,reglas,setR3,setEnt,fmt,parse,analizar,sim,seguimiento,apuesta,stakeY,STK,PAGA,load,pick,getTurno,setTurno,badges,turBar,URL_DATA};
 })();
