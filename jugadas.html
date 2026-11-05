@@ -55,6 +55,7 @@ td.c{min-width:92px;font-size:20px}
 td.c .b{color:#B03A2E;font-weight:600}
 td.jg1{min-width:56px}
 .det{margin:6px 0}.det summary{cursor:pointer;font:700 13px sans-serif;padding:4px 0}
+.gf{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.pie{flex:0 0 150px;text-align:center}.gb{flex:1;min-width:280px}
 .gr{background:#fff;border:1px solid var(--line);border-radius:8px;overflow:auto;padding:6px;max-height:80vh}
 .gr svg{display:block}
 
@@ -64,6 +65,7 @@ td.o{text-align:left;padding:6px 10px;font:13px -apple-system,Segoe UI,Roboto,sa
 .pos1{color:#1F5C38;font-weight:700}.neg1{color:#B03A2E;font-weight:700}
 tr.tot td{background:var(--gold);color:var(--navy);font-weight:700;border-top:2px solid var(--navy)}
 tr.sub td{background:#FBF3D9;font-weight:700}
+.gr{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0 0 12px;max-width:760px}.gr>b{font:700 15px Georgia,serif}.gr small{color:#555}.gl{margin:8px 0 2px}.gl>span{font-size:12px;color:#555;display:block;margin-bottom:2px}.bar{display:flex;height:26px;border-radius:6px;overflow:hidden;font:700 12px Arial,sans-serif;color:#fff;background:#bbb}.bar i{display:flex;align-items:center;justify-content:center;font-style:normal;white-space:nowrap}.bar .ok{background:#2E7D4F}.bar .no{background:#C0392B}.lg{font-size:12px;margin:6px 0 0}.lg i{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin:0 4px 0 10px}.lg i:first-child{margin-left:0}
 .res{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
 .res div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 14px;min-width:150px}
 .res b{display:block;font:700 18px Georgia,serif}.res span{font-size:12px;color:#555}
@@ -73,11 +75,12 @@ tr.sub td{background:#FBF3D9;font-weight:700}
 .tur .bd{display:inline-block;margin-left:6px;background:#F4A340;color:#4A2300;border-radius:9px;padding:0 6px;font:700 11px sans-serif;font-style:normal}
 .btn.on{background:var(--navy);color:#fff}
 </style></head><body>
-<header><div><h1>β Jugadas · Quiniela Nacional</h1><small>cada jugada de los 5 turnos con su origen · gastado, ganado bruto, perdido y neto · suma total</small></div><a class="btn" href="analisis-beta.html">‹ ANÁLISIS Beta</a><a class="btn" href="index.html" style="margin-left:6px">‹ Inicio</a></header>
+<header><div><h1>β Jugadas · Quiniela Nacional</h1><small>cada jugada de los 5 turnos con su origen · PERDIDO, GANADO y NETO · suma total</small></div><a class="btn" href="analisis-beta.html">‹ ANÁLISIS Beta</a><a class="btn" href="index.html" style="margin-left:6px">‹ Inicio</a></header>
 <div class="wrap">
  <div class="tur" id="tur"></div>
  <div class="sub">Resumen <span id="est"></span></div>
  <div class="res" id="res"></div>
+ <div id="graf"></div>
  <div class="sub">Detalle de cada jugada (la más reciente primero)</div>
  <div class="box"><div id="tabla"></div></div>
  <div class="met"><b>Cómo se calcula.</b> Una jugada es un análisis (de cualquier turno) que llegó a su ventana (sorteos Y mín a Y máx, 11 sorteos) y apostó al menos un sorteo. <b>PERDIDO</b> = lo apostado en la jugada, sumando cada sorteo de la ventana hasta que salió el dígito, se cerró la ventana o se canceló (es lo que llevás perdido si no salió hasta ahí). <b>GANADO</b> = 7 × lo apostado en el sorteo en que salió (0 si no salió dentro de la ventana). <b>NETO</b> = GANADO − PERDIDO: la ganancia limpia, ya recuperado todo lo apostado. <b>Aciertos</b> = jugadas que salieron dentro de la ventana ÷ jugadas terminadas (no cuenta las "en juego"). Cuando la ventana termina sin que salga, se anota en qué sorteo salió el dígito después (dato para estadística). Las jugadas "en juego" cuentan lo apostado hasta el último sorteo cargado y todavía no tienen premio. Los montos son los de la tabla de apuestas y valen igual para todas las posiciones. La entrada a Análisis (5 sorteos antes de Y mín o 67 sorteos sin salir) y la regla de oro 3 (5 distintos) usan los mismos interruptores que ANÁLISIS Beta; la de 8 distintos siempre se aplica.</div>
@@ -98,7 +101,7 @@ function jugadas(){const J=[];
    else if(c.tipo==="ventana"){ap=LN.apuesta(A,A.v2,null);res="Ventana cerrada sin salir";sorteoTxt="ventana terminó en el sorteo "+A.v2+(c.post?" · después salió el "+c.dig+" en el sorteo "+c.post.Ys+" ("+fmt(c.post.fecha)+")":" · todavía no salió el "+c.dig)}
    else{ap=LN.apuesta(A,c.Yc,null);res="Cancelado por regla de oro "+A.canc.regla;sorteoTxt="cancelado en el sorteo "+c.Yc}
    if(!ap.tot)continue;
-   J.push({t:T.id,tn:T.nombre,f,fila,dig:c.dig,arr:c.arr,cierre:c.fecha,Y:A.Y,v1:A.v1,v2:A.v2,res,sorteoTxt,tot:ap.tot,premio:ap.premio,neto:ap.neto,juego:false})}
+   J.push({t:T.id,tn:T.nombre,f,fila,dig:c.dig,arr:c.arr,cierre:c.fecha,Y:A.Y,v1:A.v1,v2:A.v2,res,sorteoTxt,tot:ap.tot,premio:ap.premio,neto:ap.neto,juego:false,pos:(c.tipo==="salio"&&ap.hit)?c.Ys-A.v1+1:0,jug:Math.max(0,Math.min(A.v2,c.tipo==="salio"?c.Ys:c.tipo==="ventana"?A.v2:c.Yc)-A.v1+1)})}
   if(s.ep&&s.ep.A.v1!==undefined){const A=s.ep.A;const ap=LN.apuesta(A,A.Yact,null);
    if(ap.tot)J.push({t:T.id,tn:T.nombre,f,fila,dig:s.ep.dig,arr:s.ep.arr,cierre:data[data.length-1].k,Y:A.Y,v1:A.v1,v2:A.v2,res:"En juego",sorteoTxt:"van "+A.Yact+" sorteos",tot:ap.tot,premio:0,neto:-ap.tot,juego:true})}}
  J.sort((a,b)=>b.cierre.localeCompare(a.cierre)||a.fila.localeCompare(b.fila));return J}
@@ -107,14 +110,34 @@ function barra(){LN.turBar($("tur"),TS,null,id=>{SEL=id;barra();render()});
  const b=document.createElement("button");b.className="btn"+(SEL==="todos"?" on":"");b.dataset.t="todos";b.textContent="Todos los turnos";$("tur").prepend(b);
  $("tur").querySelectorAll("[data-t]").forEach(x=>x.classList.toggle("on",x.dataset.t===SEL));
  $("tur").onclick=e=>{const x=e.target.closest("[data-t]");if(x){SEL=x.dataset.t;barra();render()}}}
+function barraP(t,ok,no){const n=ok+no;if(!n)return `<div class="gl"><span>${t} · sin jugadas terminadas</span><div class="bar"></div></div>`;const p=Math.round(100*ok/n);return `<div class="gl"><span>${t} · ${n} jugadas terminadas</span><div class="bar">${ok?`<i class="ok" style="width:${100*ok/n}%">${ok} · ${p} %</i>`:""}${no?`<i class="no" style="width:${100*no/n}%">${no} · ${100-p} %</i>`:""}</div></div>`}
+function torta(ok,no){const n=ok+no,P=(t)=>[+(70+62*Math.sin(t)).toFixed(2),+(70-62*Math.cos(t)).toFixed(2)];
+ if(!n)return `<svg viewBox="0 0 140 140" width="150"><circle cx="70" cy="70" r="62" fill="#ddd"/><text x="70" y="74" text-anchor="middle" font-size="11" fill="#666">sin datos</text></svg>`;
+ const p=Math.round(100*ok/n),a=2*Math.PI*ok/n;let sl;
+ if(!no)sl='<circle cx="70" cy="70" r="62" fill="#2E7D4F"/>';else if(!ok)sl='<circle cx="70" cy="70" r="62" fill="#C0392B"/>';
+ else{const[x,y]=P(a),big=a>Math.PI?1:0;sl=`<path d="M70 70 L70 8 A62 62 0 ${big} 1 ${x} ${y} Z" fill="#2E7D4F"/><path d="M70 70 L${x} ${y} A62 62 0 ${1-big} 1 70 8 Z" fill="#C0392B"/>`}
+ return `<svg viewBox="0 0 140 140" width="150">${sl}<circle cx="70" cy="70" r="31" style="fill:var(--card)"/><text x="70" y="70" text-anchor="middle" font-size="21" font-weight="700" font-family="Georgia,serif" fill="#1B2A4A">${p} %</text><text x="70" y="85" text-anchor="middle" font-size="9" fill="#555">aciertos</text></svg><div style="font-size:12px;color:#555">${ok} salieron · ${no} no<br>(${100-p} % no salió)</div>`}
+function graf(ALL,J,turnos){const fin=a=>a.filter(j=>!j.juego),cnt=a=>{const f=fin(a),ok=f.filter(j=>j.premio>0).length;return[ok,f.length-ok]};
+ let h='<div class="gr"><b>Cómo venimos acertando</b> <small>(salió dentro de la ventana vs. no salió)</small><div class="gf"><div class="pie">'+torta(...cnt(J))+'</div><div class="gb">'+barraP(turnos?"Todos los turnos":"Total",...cnt(J));
+ if(turnos)for(const t of turnos)h+=barraP(t.nombre,...cnt(ALL.filter(j=>j.t===t.id)));
+ h+='</div></div>';
+ const f=fin(J).slice().reverse();
+ if(f.length>=2){let ok=0;const pts=f.map((j,i)=>{if(j.premio>0)ok++;return 100*ok/(i+1)}),W=640,H=130,X=i=>34+i*(W-44)/(pts.length-1),Y=v=>10+(100-v)*(H-30)/100;
+  h+=`<div class="gl"><span>Evolución del % de aciertos (acumulado, jugada por jugada)</span><svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">`+[0,50,100].map(v=>`<line x1="34" x2="${W-10}" y1="${Y(v)}" y2="${Y(v)}" stroke="#ddd"/><text x="30" y="${Y(v)+3}" font-size="9" text-anchor="end" fill="#666">${v}%</text>`).join("")+`<polyline fill="none" stroke="#1B2A4A" stroke-width="2" points="${pts.map((v,i)=>X(i)+","+Y(v)).join(" ")}"/><circle cx="${X(pts.length-1)}" cy="${Y(pts[pts.length-1])}" r="3.5" fill="#C9A84C" stroke="#1B2A4A"/><text x="${X(pts.length-1)-6}" y="${Y(pts[pts.length-1])-7}" font-size="10" font-weight="700" text-anchor="end" fill="#1B2A4A">${Math.round(pts[pts.length-1])} %</text></svg></div>`}
+
+ {const F=fin(J),f2=F.filter(j=>j.premio>0&&j.pos),N=f2.length,c=Array(11).fill(0),r=Array(11).fill(0);
+  F.forEach(j=>{for(let k=1;k<=Math.min(11,j.jug||0);k++)r[k-1]++});f2.forEach(j=>{if(j.pos>=1&&j.pos<=11)c[j.pos-1]++});
+  if(r[0]){const W=640,H=150,bw=(W-44)/11,pc=c.map((v,i)=>r[i]?100*v/r[i]:0),mx=Math.max(...pc,1);
+   h+=`<div class="gl"><span>¿En qué sorteo de la ventana salen? Solo jugadas apostadas · arriba el % de acierto, abajo "salieron de cuántos casos jugados" en ese sorteo (Y mín 1 = primer sorteo jugado, Y mín 11 = Y máx)</span><svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">`+c.map((v,i)=>{const bh=(pc[i]/mx)*(H-56),x=34+i*bw;return `<rect x="${x+4}" y="${H-30-bh}" width="${bw-8}" height="${bh}" fill="#2E7D4F" rx="2"/><text x="${x+bw/2}" y="${H-34-bh}" font-size="10" font-weight="700" text-anchor="middle" fill="#1B2A4A">${r[i]?Math.round(pc[i])+" %":"–"}</text><text x="${x+bw/2}" y="${H-18}" font-size="9" text-anchor="middle" fill="#555">${r[i]?v+" de "+r[i]:"0 casos"}</text><text x="${x+bw/2}" y="${H-5}" font-size="8.5" text-anchor="middle" fill="#666">${i===10?"Y máx":"Y mín "+(i+1)}</text>`}).join("")+`</svg></div>`}}
+ return h+'<div class="lg"><i style="background:#2E7D4F"></i>Salió dentro de la ventana<i style="background:#C0392B"></i>No salió dentro de la ventana</div></div>'}
 function render(){const ALL=jugadas(),J=SEL==="todos"?ALL:ALL.filter(j=>j.t===SEL),T=sum(J);
+ $("graf").innerHTML=graf(ALL,J,SEL==="todos"?TS:null);
  $("res").innerHTML=`<div><span>Jugadas</span><b>${T.n}</b><span>${T.ok} salieron · ${T.n-T.ok-T.en} no salieron · ${T.en} en juego</span></div><div><span>Aciertos</span><b>${(T.ok+T.n-T.ok-T.en)?Math.round(100*T.ok/(T.n-T.en)):0} %</b><span>de las jugadas terminadas</span></div><div><span>PERDIDO</span><b>${m$(T.tot)}</b><span>apostado</span></div><div><span>GANADO</span><b>${m$(T.premio)}</b></div><div><span>NETO</span><b class="${cl(T.neto)}">${m$(T.neto)}</b></div>`;
  if(!J.length){$("tabla").innerHTML='<div class="vac">Todavía no hay jugadas: ninguna fila llegó a su ventana de juego.</div>';return}
  const row=(j,k)=>`<tr><td class="t">${J.length-k}</td><td class="o"><b>${j.fila}</b> · dígito <b>${j.dig}</b><br>arranque ${fmt(j.arr)} · Y máx ${j.Y} · ventana sorteos ${j.v1} a ${j.v2}</td><td class="t">${fmt(j.cierre)}</td><td class="o">${j.res}<br><small>${j.sorteoTxt}</small></td><td class="n">${m$(j.tot)}</td><td class="n">${m$(j.premio)}</td><td class="n ${cl(j.neto)}">${m$(j.neto)}</td></tr>`;
  const tr=(t,S,c)=>`<tr class="${c}"><td colspan="4" style="text-align:right">${t} (${S.n} jugadas)</td><td class="n">${m$(S.tot)}</td><td class="n">${m$(S.premio)}</td><td class="n">${m$(S.neto)}</td></tr>`;
  let sub="";
  if(SEL==="todos")for(const t of TS)sub+=tr("Subtotal "+t.nombre,sum(J.filter(j=>j.t===t.id)),"sub");
- sub+=tr("Subtotal Unidades",sum(J.filter(j=>j.f==="u")),"sub")+tr("Subtotal Decenas",sum(J.filter(j=>j.f==="d")),"sub");
  $("tabla").innerHTML='<table><thead><tr><th>N°</th><th>Origen de la jugada</th><th>Fecha de cierre</th><th>Resultado</th><th>PERDIDO</th><th>GANADO</th><th>NETO</th></tr></thead><tbody>'+J.map(row).join("")+sub+tr("TOTAL"+(SEL==="todos"?"":" · "+(TS.find(t=>t.id===SEL)||{nombre:""}).nombre),T,"tot")+'</tbody></table>'}
 async function cargar(){$("est").textContent="· actualizando…";
  const r=await LN.load();TS=r.turnos;$("est").textContent="· "+r.msg;
