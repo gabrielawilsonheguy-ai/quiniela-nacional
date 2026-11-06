@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Research · Quiniela Nacional</title>
+<meta name="theme-color" content="#1B2A4A">
+<link rel="manifest" href="manifest-res.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/nres-32.png">
+<link rel="apple-touch-icon" href="icons/nres-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Research">
+<style>
+:root{--navy:#1B2A4A;--gold:#C9A84C;--bg:#E8E6DF;--card:#F5F3EE;--line:#D8D4C8;--red:#B03A2E;--ok:#2E7D4F}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--navy);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--navy);color:#fff;padding:6px 14px;border-bottom:3px solid var(--gold);display:flex;align-items:center;gap:12px}
+h1{font:700 17px Georgia,serif;margin:0}header small{color:#cfd6e6;font-size:11px}
+.wrap{padding:10px 12px;max-width:1500px}.gx{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}.gx>.gr{flex:1 1 520px;max-width:720px;margin:0}.esq{flex:1 1 440px;max-width:640px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px}.esq svg{display:block;width:100%;height:auto}
+.btn{border:1px solid var(--navy);background:var(--card);color:var(--navy);padding:5px 10px;border-radius:8px;font-size:13px;cursor:pointer;text-decoration:none;display:inline-block}
+header .btn{margin-left:auto}.btn.on{background:var(--navy);color:#fff}
+.tur{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}.tur .btn small{font-size:10px;opacity:.7}
+.sub{font:700 16px Georgia,serif;color:#555;margin:10px 0 6px}#est{font:400 12px sans-serif}
+.box{background:#fff;border:1px solid var(--line);border-radius:8px;overflow:auto}
+table{border-collapse:separate;border-spacing:0;text-align:center;font-size:13px;width:100%}
+th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px 8px}
+thead th{background:var(--navy);color:#fff;font-size:12px;vertical-align:bottom}
+th.g1{background:#8a6d1f}th.g2{background:#5a3a8a}th.g3{background:#2E7D4F}th.g4{background:#B03A2E}
+td.n{text-align:left;font-weight:700;white-space:nowrap}
+td b{display:block;font-size:15px}td small{color:#555;font-size:11px;white-space:normal}
+tr.tot td{background:var(--gold);color:var(--navy);font-weight:700;border-top:2px solid var(--navy)}tr.tot td small{color:var(--navy)}
+.gr{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0 0 12px;max-width:760px}
+.fb{margin:6px 0}.fb>span{font-size:12px;color:#555;display:block;margin-bottom:2px}
+
+.met{margin-top:12px;font-size:12px;color:#444;line-height:1.6;max-width:900px}
+.vac{padding:26px 12px;text-align:center;color:#555}
+</style></head><body>
+<header><div><h1>Research · Embudo del proceso</h1><small>Quiniela Nacional · cuántos casos entran, se descartan, llegan a la ventana y la superan</small></div><a class="btn" href="jugadas.html">‹ Jugadas</a><a class="btn" href="index.html" style="margin-left:6px">‹ Inicio</a></header>
+<div class="wrap">
+ <div class="tur" id="tur"></div>
+ <div class="sub">Embudo por turno <span id="est"></span></div>
+ <div class="box"><div id="tabla"></div></div>
+ <div class="sub">Embudo gráfico <span id="qt"></span></div>
+ <div class="gx"><div class="gr" id="graf"></div><div class="esq" id="esq"></div></div>
+ <div class="met" id="met"></div>
+</div>
+<script src="nac-core.js"></script>
+<script>
+const $=id=>document.getElementById(id);let TS=[],SEL="todos";
+const ESTS=["juntando","espera","ventana","desc","antes","acierto","supera"];
+function contar(turno){const o={arr:0,juntando:0,espera:0,ventana:0,desc:0,antes:0,acierto:0,supera:0,rg:{},desp:0,aun:0,antDesc:0,pos:Array(11).fill(0)};
+ for(const f of["u","d"])for(let i=0;i<20;i++){const s=LN.sim(turno.data,i,f);
+  for(const K of s.casos){o.arr++;o[K.e]++;
+   if(K.e==="desc")o.rg[K.regla]=(o.rg[K.regla]||0)+1;
+   if(K.e==="desc"&&K.ant)o.antDesc++;
+   if(K.e==="supera"){if(K.c&&K.c.post)o.desp++;else o.aun++}
+   if(K.e==="acierto"&&K.c&&K.c.A.v1!==undefined){const p=K.c.Ys-K.c.A.v1;if(p>=0&&p<11)o.pos[p]++}}}
+ return o}
+const sumar=a=>a.reduce((r,x)=>{for(const k of ESTS.concat(["arr","desp","aun","antDesc"]))r[k]=(r[k]||0)+x[k];for(const g in x.rg)r.rg[g]=(r.rg[g]||0)+x.rg[g];return r},{rg:{}});
+const pc=(a,b)=>{if(!b)return"–";const p=100*a/b;return(p<10&&p>0?p.toFixed(1).replace(".",","):Math.round(p))+" %"};
+function fila(n,o,cls){const curso=o.juntando+o.espera+o.ventana,term=o.arr-curso,lleg=o.acierto+o.supera;
+ const rg=Object.keys(o.rg).sort().map(g=>"regla "+g+": "+o.rg[g]).join(" · ");
+ return `<tr class="${cls||""}"><td class="n">${n}</td>
+ <td><b>${o.arr}</b><small>100 %</small></td>
+ <td><b>${o.juntando}</b><small>juntando distintos</small></td><td><b>${o.espera}</b><small>9º distinto, espera</small></td><td><b>${o.ventana}</b><small>en ventana</small></td>
+ <td><b>${o.desc}</b><small>${pc(o.desc,term)} de ${term}${rg?"<br>"+rg:""}</small></td>
+ <td><b>${o.antes}</b><small>${pc(o.antes,term)}</small></td>
+ <td><b>${lleg}</b><small>${pc(lleg,term)}</small></td>
+ <td><b>${o.acierto}</b><small>${pc(o.acierto,lleg)} de los que llegaron</small></td>
+ <td><b>${o.supera}</b><small>${pc(o.supera,lleg)}<br>salió después: ${o.desp} · todavía no: ${o.aun}</small></td></tr>`}
+function barra(t,v,max,col,extra){return `<div class="fb"><span>${t}</span><div style="display:flex;align-items:center;gap:8px;padding:0;height:auto"><i style="display:block;height:22px;border-radius:5px;width:${Math.max(0.5,100*v/(max||1))*.7}%;background:${col}"></i><b style="font:700 12px Arial,sans-serif;color:#1B2A4A;white-space:nowrap">${v}${extra||""}</b></div></div>`}
+
+function esquema(o){const curso=o.juntando+o.espera+o.ventana,lleg=o.acierto+o.supera,B=(x,y,w,h,f,st,t,sub,n,tc)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${f}" stroke="${st||'none'}" stroke-width="2"/><text x="${x+w/2}" y="${y+22}" text-anchor="middle" font-size="14" font-weight="700" fill="${tc||'#1B2A4A'}">${t}</text><text x="${x+w/2}" y="${y+h-8}" text-anchor="middle" font-size="11.5" fill="${tc||'#555'}">${sub}</text>`,N=(x,y,n,c)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="22" font-weight="700" font-family="Georgia,serif" fill="${c||'#1B2A4A'}">${n}</text>`;
+ return `<svg viewBox="0 0 900 650" font-family="Arial,sans-serif"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1B2A4A"/></marker></defs>
+ <g stroke="#1B2A4A" stroke-width="2" marker-end="url(#ar)" fill="none"><path d="M450 98V128"/><path d="M450 198V228"/><path d="M450 298V328"/><path d="M450 398V428"/><path d="M400 488L250 518"/><path d="M500 488L650 518"/><path d="M300 163H190"/><path d="M600 263H700"/><path d="M250 590V610" stroke-dasharray="4 3"/><path d="M650 590V610" stroke-dasharray="4 3"/></g>
+ ${B(300,50,300,48,'#1B2A4A','',`1 · Arrancan: ${o.arr}`,'sale el primer número',0,'#fff')}
+ ${B(300,128,300,70,'#E8DFC4','#C9A84C','2 · Juntando distintos','todavía sin 9º distinto · EN CURSO')}${N(450,172,o.juntando)}
+ ${B(20,128,170,70,'#FBD5D0','#C0392B','Descartados','por regla de oro',0,'#C0392B')}${N(105,172,o.desc,'#C0392B')}
+ ${B(300,228,300,70,'#E8DFC4','#C9A84C','3 · Ya salió el 9º distinto','espera la ventana · EN CURSO')}${N(450,272,o.espera)}
+ ${B(700,228,190,70,'#F3E7B8','#8a6d1f','Salieron antes','de la ventana (no se jugó)',0,'#8a6d1f')}${N(795,272,o.antes,'#8a6d1f')}
+ ${B(300,328,300,70,'#E8DFC4','#C9A84C','4 · En ventana ahora','se juegan los 11 sorteos · EN CURSO')}${N(450,372,o.ventana)}
+ ${B(300,428,300,60,'#1B2A4A','',`5 · Llegan a la ventana: ${lleg}`,'terminó la ventana',0,'#fff')}
+ ${B(110,518,280,72,'#CDEBD6','#2E7D4F','Salieron dentro (ACIERTO)','en Y mín 1 … Y máx',0,'#1F5C38')}${N(250,566,o.acierto,'#1F5C38')}
+ ${B(510,518,280,72,'#FBD5D0','#C0392B','Superaron la ventana','no salió en los 11 sorteos',0,'#C0392B')}${N(650,566,o.supera,'#C0392B')}
+ <rect x="110" y="610" width="280" height="34" rx="8" fill="#fff" stroke="#999"/><text x="250" y="632" text-anchor="middle" font-size="11.5" fill="#555">¿en qué sorteo de la ventana salió?</text>
+ <rect x="510" y="610" width="280" height="34" rx="8" fill="#fff" stroke="#999"/><text x="650" y="632" text-anchor="middle" font-size="11.5" fill="#555">salió después: ${o.desp} · todavía no: ${o.aun}</text></svg>`}
+function render(){
+ if(!TS.length){$("tabla").innerHTML='<div class="vac">No hay datos.</div>';return}
+ const C=TS.map(t=>({t,o:contar(t)})),tot=sumar(C.map(x=>x.o));
+ $("tabla").innerHTML='<table><thead><tr><th>Turno</th><th class="g1">1 · Arrancan</th><th class="g2" colspan="3">En curso (todavía no terminaron)</th><th>Descartados</th><th>Salieron antes de la ventana</th><th class="g3">Llegan a la ventana</th><th class="g3">Salieron dentro</th><th class="g4">Superaron la ventana</th></tr></thead><tbody>'+C.map(x=>fila(x.t.nombre,x.o)).join("")+fila("TOTAL",tot,"tot")+'</tbody></table>';
+ const o=SEL==="todos"?tot:C.find(x=>x.t.id===SEL).o,curso=o.juntando+o.espera+o.ventana,term=o.arr-curso,lleg=o.acierto+o.supera;
+ $("esq").innerHTML=esquema(o);
+ $("qt").textContent="· "+(SEL==="todos"?"todos los turnos":TS.find(t=>t.id===SEL).nombre);
+ $("graf").innerHTML=barra("Arrancan (terminados + en curso)",o.arr,o.arr,"#1B2A4A",` · en curso ${curso}`)+barra("Terminados",term,o.arr,"#5b6b8c",` · ${pc(term,o.arr)}`)+barra("Descartados",o.desc,o.arr,"#C0392B",` · ${pc(o.desc,term)} de terminados`)+barra("Salieron antes de la ventana",o.antes,o.arr,"#8a6d1f",` · ${pc(o.antes,term)}`)+barra("Llegan a la ventana",lleg,o.arr,"#2E7D4F",` · ${pc(lleg,term)}`)+barra("Salieron dentro de la ventana (acierto)",o.acierto,o.arr,"#2E7D4F",` · ${pc(o.acierto,lleg)} de los que llegaron`)+barra("Superaron la ventana",o.supera,o.arr,"#C0392B",` · ${pc(o.supera,lleg)} de los que llegaron`);
+ $("met").innerHTML="<b>Cómo se lee.</b> Un <b>caso</b> arranca cuando un número pasa a ser el que más hace que no sale (en cada posición, Unidades y Decenas, de cada turno). <b>Descartados</b>: cancelados por una regla de oro antes o durante el análisis. <b>Salieron antes de la ventana</b>: el número salió antes de llegar a Y mín, así que nunca se jugó. <b>Llegan a la ventana</b> = salieron dentro + superaron. Los porcentajes se calculan sobre los casos <b>terminados</b>; los casos <b>en curso</b> se muestran aparte para no mover el %. Con la configuración actual de Entrada a Análisis ("+LN.reglas.ent+") y la regla de 5 distintos "+(LN.reglas.r3?"activada":"apagada")+"."}
+async function cargar(){$("est").textContent="· actualizando…";const r=await LN.load();TS=r.turnos;$("est").textContent="· "+r.msg;
+ if(SEL!=="todos"&&!TS.find(t=>t.id===SEL))SEL="todos";bar();render()}
+function bar(){const h=['<button class="btn'+(SEL==="todos"?" on":"")+'" data-t="todos">Todos los turnos</button>'].concat(TS.map(t=>`<button class="btn${SEL===t.id?" on":""}" data-t="${t.id}">${t.nombre}<small> ${t.hora}</small></button>`));$("tur").innerHTML=h.join("");
+ $("tur").onclick=e=>{const x=e.target.closest("[data-t]");if(x){SEL=x.dataset.t;bar();render()}}}
+cargar();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script></body></html>

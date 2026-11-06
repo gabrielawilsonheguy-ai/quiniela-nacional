@@ -51,16 +51,16 @@ function analizar(ser){
 function sim(data,i,f){
  f=f||"u";const n=data.length;
  if(n<2)return{R:null,ep:null,cer:[]};
- const last={},disc=new Set(),cer=[],ac={};let ep=null,sale=null;
+ const last={},disc=new Set(),cer=[],ac={},casos={};let ep=null,sale=null;
  const serie=(L,t)=>data.slice(L+1,t+1).map(x=>x[f][i]);
  for(let t=0;t<n;t++){
   const d=data[t][f][i];sale=null;
   if(disc.has(d)){for(let k=cer.length-1;k>=0;k--){const c=cer[k];if(c.dig===d&&c.tipo!=="salio"&&!c.post){c.post={t,Ys:t-c.L,fecha:data[t].k};break}}}
   let cand=null;
   if(Object.keys(last).length===10){let m=Infinity;for(const x in last)if(!disc.has(x)&&last[x]<m){m=last[x];cand=x}}
-  if(cand!==null&&d===cand){const Lp=last[cand];sale={t,dig:cand,Lp};
+  if(cand!==null&&d===cand){const Lp=last[cand];sale={t,dig:cand,Lp};{const K0=casos[Lp];if(K0&&K0.e==='juntando'){K0.e='antes';K0.t=t}}
    if(ep&&ep.dig===cand){const A=analizar(serie(Lp,t-1)),Ys=t-Lp;
-    cer.push({pos:i,dig:cand,arr:data[Lp+1].k,L:Lp,tipo:"salio",t,fecha:data[t].k,Ys,A,dentro:A.v1!==undefined&&Ys>=A.v1&&Ys<=A.v2});ep=null}}
+    {const cc={pos:i,dig:cand,arr:data[Lp+1].k,L:Lp,tipo:"salio",t,fecha:data[t].k,Ys,A,dentro:A.v1!==undefined&&Ys>=A.v1&&Ys<=A.v2};cer.push(cc);const K1=casos[Lp];if(K1){K1.e=cc.dentro?'acierto':'antes';K1.c=cc;K1.t=t;K1.Ys=Ys}}ep=null}}
   last[d]=t;disc.delete(d);
   if(Object.keys(last).length===10){
    for(let g=0;g<10;g++){
@@ -68,17 +68,18 @@ function sim(data,i,f){
     if(c===null)break;
     const L=last[c],gap=t-L;
     if(L>=t)break;
+    const K=casos[L]||(casos[L]={dig:c,L,arr:data[L+1].k,e:'juntando'});
     if(!ep){
      if(reglas.ent==="A"){if(gap>=LIM)ep={dig:c,L,arr:data[L+1].k,t0:t,f0:data[t].k}}
      else{ // B: ya salieron los 9 distintos; entra 5 sorteos antes de Y mín
       if(!ac[L])ac[L]=analizar(serie(L,t));
       const A0=ac[L];
-      if(A0.canc){disc.add(c);continue}
+      if(A0.canc){disc.add(c);K.e='desc';K.regla=A0.canc.regla;K.txt=A0.canc.txt;K.ant=true;continue}
       if(A0.v1!==undefined&&gap>=A0.v1-ANTES)ep={dig:c,L,arr:data[L+1].k,t0:t,f0:data[t].k}}}
     if(!ep)break;
     const A=analizar(serie(L,t));
     if(A.canc||(A.v2!==undefined&&A.Yact>=A.v2)){
-     cer.push({pos:i,dig:c,arr:ep.arr,L,tipo:A.canc?"canc":"ventana",t,fecha:data[t].k,Yc:A.Yact,A});
+     {const cc={pos:i,dig:c,arr:ep.arr,L,tipo:A.canc?"canc":"ventana",t,fecha:data[t].k,Yc:A.Yact,A};cer.push(cc);K.c=cc;K.e=A.canc?'desc':'supera';if(A.canc){K.regla=A.canc.regla;K.txt=A.canc.txt}K.t=t}
      disc.add(c);ep=null;continue}
     break}}}
  let R=null;
@@ -99,7 +100,8 @@ function sim(data,i,f){
  let epv=null;
  if(ep&&R&&R.ana)epv=Object.assign({},ep,{A:analizar(serie(ep.L,n-1))});
  const saleEp=cer.find(c=>c.tipo==="salio"&&c.t===n-1)||null;
- return{R,ep:epv,cer,saleEp}}
+ for(const K of Object.values(casos)){if(K.e==='juntando'){const A=analizar(serie(K.L,n-1));K.nd=A.nd;K.v1=A.v1;K.Yact=A.Yact;K.e=(A.nd<9||A.v1===undefined)?'juntando':(A.Yact>=A.v1?'ventana':'espera')}}
+ return{R,ep:epv,cer,saleEp,casos:Object.values(casos)}}
 function seguimiento(data,i,f){return sim(data,i,f).R}
 // Carga de la base (con copia local si no hay conexión)
 const URL_DATA="https://gabrielawilsonheguy-ai.github.io/quiniela-bolillero/data/resultados.json",CK="lw:nac-cache-v1";
