@@ -34,7 +34,7 @@ function analizar(ser){
    if(!canc){amax=Math.max(amax,a);
     if(bb&&bb.b>=2)canc={regla:1,txt:"β "+bb.N+" llegó a 2",y,it:[it],b:bb};
     else if(bb&&bb.b<1)canc={regla:2,txt:"β menor que 1",y,it:[it],b:bb};
-    // (el α ya no cancela: por ahora solo cancela β ≥ 2; el α se muestra para comparar)
+    else if(x>=2&&a>=2-1e-12)canc={regla:1,txt:"α "+x+" llegó a 2",y,it:[it],a};
     else if(y===8&&D.length===8)canc={regla:3,txt:"8 distintos en los 8 primeros sorteos",y,it:D.slice(-8)}
     else if(reglas.r3&&y===5&&D.length===5)canc={regla:3,txt:"5 distintos en los 5 primeros sorteos",y,it:D.slice(-5)}}}}
  if(canc)canc.it.forEach(z=>z.rj=true);
@@ -100,7 +100,8 @@ function sim(data,i,f){
  let epv=null;
  if(ep&&R&&R.ana)epv=Object.assign({},ep,{A:analizar(serie(ep.L,n-1))});
  const saleEp=cer.find(c=>c.tipo==="salio"&&c.t===n-1)||null;
- for(const K of Object.values(casos)){if(K.e==='juntando'){const A=analizar(serie(K.L,n-1));K.nd=A.nd;K.v1=A.v1;K.Yact=A.Yact;K.e=(A.nd<9||A.v1===undefined)?'juntando':(A.Yact>=A.v1?'ventana':'espera')}}
+ for(const K of Object.values(casos)){{let te=n;for(let k=K.L+1;k<n;k++)if(data[k][f][i]===K.dig){te=k;break}const st=new Set();for(let k=K.L+1;k<te;k++)st.add(data[k][f][i]);K.n9=st.size>=9;K.p100=K.n9&&((te<n?te:n-1)-K.L>100);if(K.e==='antes'&&!K.n9)K.e='sin9'}
+  if(K.e==='juntando'){const A=analizar(serie(K.L,n-1));K.nd=A.nd;K.v1=A.v1;K.Yact=A.Yact;K.e=(A.nd<9||A.v1===undefined)?'juntando':(A.Yact>=A.v1?'ventana':'espera')}}
  return{R,ep:epv,cer,saleEp,casos:Object.values(casos)}}
 function seguimiento(data,i,f){return sim(data,i,f).R}
 // Carga de la base (con copia local si no hay conexión)

@@ -32,11 +32,12 @@ tr.tot td{background:var(--gold);color:var(--navy);font-weight:700;border-top:2p
 .fb{margin:6px 0}.fb>span{font-size:12px;color:#555;display:block;margin-bottom:2px}
 
 .met{margin-top:12px;font-size:12px;color:#444;line-height:1.6;max-width:900px}
-.vac{padding:26px 12px;text-align:center;color:#555}
+.kpi{display:flex;gap:12px;flex-wrap:wrap;margin:4px 0 6px}.kpi>div{flex:1 1 220px;max-width:330px;background:#fff;border:2px solid var(--gold);border-radius:10px;padding:10px 14px}.kpi b{display:block;font:700 34px Georgia,serif;color:var(--navy);line-height:1.1}.kpi span{font-size:13px;font-weight:700}.kpi small{display:block;font-size:11.5px;color:#555;margin-top:2px}.kpi .rd{border-color:var(--red)}.kpi .rd b{color:var(--red)}.kpi .vd{border-color:var(--ok)}.kpi .vd b{color:var(--ok)}.vac{padding:26px 12px;text-align:center;color:#555}
 </style></head><body>
 <header><div><h1>Research · Embudo del proceso</h1><small>Quiniela Nacional · cuántos casos entran, se descartan, llegan a la ventana y la superan</small></div><a class="btn" href="jugadas.html">‹ Jugadas</a><a class="btn" href="index.html" style="margin-left:6px">‹ Inicio</a></header>
 <div class="wrap">
  <div class="tur" id="tur"></div>
+<div class="kpi" id="kpi"></div>
  <div class="sub">Embudo por turno <span id="est"></span></div>
  <div class="box"><div id="tabla"></div></div>
  <div class="sub">Embudo gráfico <span id="qt"></span></div>
@@ -46,10 +47,10 @@ tr.tot td{background:var(--gold);color:var(--navy);font-weight:700;border-top:2p
 <script src="nac-core.js"></script>
 <script>
 const $=id=>document.getElementById(id);let TS=[],SEL="todos";
-const ESTS=["juntando","espera","ventana","desc","antes","acierto","supera"];
-function contar(turno){const o={arr:0,juntando:0,espera:0,ventana:0,desc:0,antes:0,acierto:0,supera:0,rg:{},desp:0,aun:0,antDesc:0,pos:Array(11).fill(0)};
+const ESTS=["juntando","espera","ventana","desc","sin9","antes","acierto","supera","base","baseT","p100"];
+function contar(turno){const o={arr:0,juntando:0,espera:0,ventana:0,desc:0,sin9:0,antes:0,acierto:0,supera:0,base:0,baseT:0,p100:0,rg:{},desp:0,aun:0,antDesc:0,pos:Array(11).fill(0)};
  for(const f of["u","d"])for(let i=0;i<20;i++){const s=LN.sim(turno.data,i,f);
-  for(const K of s.casos){o.arr++;o[K.e]++;
+  for(const K of s.casos){o.arr++;o[K.e]++;if(K.p100)o.p100++;if(K.n9){o.base++;if(K.e!=="espera"&&K.e!=="ventana")o.baseT++}
    if(K.e==="desc")o.rg[K.regla]=(o.rg[K.regla]||0)+1;
    if(K.e==="desc"&&K.ant)o.antDesc++;
    if(K.e==="supera"){if(K.c&&K.c.post)o.desp++;else o.aun++}
@@ -63,6 +64,7 @@ function fila(n,o,cls){const curso=o.juntando+o.espera+o.ventana,term=o.arr-curs
  <td><b>${o.arr}</b><small>100 %</small></td>
  <td><b>${o.juntando}</b><small>juntando distintos</small></td><td><b>${o.espera}</b><small>9º distinto, espera</small></td><td><b>${o.ventana}</b><small>en ventana</small></td>
  <td><b>${o.desc}</b><small>${pc(o.desc,term)} de ${term}${rg?"<br>"+rg:""}</small></td>
+ <td><b>${o.sin9}</b><small>${pc(o.sin9,term)}</small></td>
  <td><b>${o.antes}</b><small>${pc(o.antes,term)}</small></td>
  <td><b>${lleg}</b><small>${pc(lleg,term)}</small></td>
  <td><b>${o.acierto}</b><small>${pc(o.acierto,lleg)} de los que llegaron</small></td>
@@ -71,12 +73,12 @@ function barra(t,v,max,col,extra){return `<div class="fb"><span>${t}</span><div 
 
 function esquema(o){const curso=o.juntando+o.espera+o.ventana,lleg=o.acierto+o.supera,B=(x,y,w,h,f,st,t,sub,n,tc)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${f}" stroke="${st||'none'}" stroke-width="2"/><text x="${x+w/2}" y="${y+22}" text-anchor="middle" font-size="14" font-weight="700" fill="${tc||'#1B2A4A'}">${t}</text><text x="${x+w/2}" y="${y+h-8}" text-anchor="middle" font-size="11.5" fill="${tc||'#555'}">${sub}</text>`,N=(x,y,n,c)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="22" font-weight="700" font-family="Georgia,serif" fill="${c||'#1B2A4A'}">${n}</text>`;
  return `<svg viewBox="0 0 900 650" font-family="Arial,sans-serif"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#1B2A4A"/></marker></defs>
- <g stroke="#1B2A4A" stroke-width="2" marker-end="url(#ar)" fill="none"><path d="M450 98V128"/><path d="M450 198V228"/><path d="M450 298V328"/><path d="M450 398V428"/><path d="M400 488L250 518"/><path d="M500 488L650 518"/><path d="M300 163H190"/><path d="M600 263H700"/><path d="M250 590V610" stroke-dasharray="4 3"/><path d="M650 590V610" stroke-dasharray="4 3"/></g>
+ <g stroke="#1B2A4A" stroke-width="2" marker-end="url(#ar)" fill="none"><path d="M450 98V128"/><path d="M450 198V228"/><path d="M450 298V328"/><path d="M450 398V428"/><path d="M400 488L250 518"/><path d="M500 488L650 518"/><path d="M300 150H190"/><path d="M600 263H700"/><path d="M600 163H700"/><path d="M250 590V610" stroke-dasharray="4 3"/><path d="M650 590V610" stroke-dasharray="4 3"/></g>
  ${B(300,50,300,48,'#1B2A4A','',`1 · Arrancan: ${o.arr}`,'sale el primer número',0,'#fff')}
  ${B(300,128,300,70,'#E8DFC4','#C9A84C','2 · Juntando distintos','todavía sin 9º distinto · EN CURSO')}${N(450,172,o.juntando)}
  ${B(20,128,170,70,'#FBD5D0','#C0392B','Descartados','por regla de oro',0,'#C0392B')}${N(105,172,o.desc,'#C0392B')}
  ${B(300,228,300,70,'#E8DFC4','#C9A84C','3 · Ya salió el 9º distinto','espera la ventana · EN CURSO')}${N(450,272,o.espera)}
- ${B(700,228,190,70,'#F3E7B8','#8a6d1f','Salieron antes','de la ventana (no se jugó)',0,'#8a6d1f')}${N(795,272,o.antes,'#8a6d1f')}
+ ${B(700,128,190,70,'#F3E7B8','#8a6d1f','Salieron antes','del 9º distinto',0,'#8a6d1f')}${N(795,172,o.sin9,'#8a6d1f')}${B(700,228,190,70,'#F3E7B8','#8a6d1f','Salieron después','del 9º, antes de la ventana',0,'#8a6d1f')}${N(795,272,o.antes,'#8a6d1f')}
  ${B(300,328,300,70,'#E8DFC4','#C9A84C','4 · En ventana ahora','se juegan los 11 sorteos · EN CURSO')}${N(450,372,o.ventana)}
  ${B(300,428,300,60,'#1B2A4A','',`5 · Llegan a la ventana: ${lleg}`,'terminó la ventana',0,'#fff')}
  ${B(110,518,280,72,'#CDEBD6','#2E7D4F','Salieron dentro (ACIERTO)','en Y mín 1 … Y máx',0,'#1F5C38')}${N(250,566,o.acierto,'#1F5C38')}
@@ -86,11 +88,13 @@ function esquema(o){const curso=o.juntando+o.espera+o.ventana,lleg=o.acierto+o.s
 function render(){
  if(!TS.length){$("tabla").innerHTML='<div class="vac">No hay datos.</div>';return}
  const C=TS.map(t=>({t,o:contar(t)})),tot=sumar(C.map(x=>x.o));
- $("tabla").innerHTML='<table><thead><tr><th>Turno</th><th class="g1">1 · Arrancan</th><th class="g2" colspan="3">En curso (todavía no terminaron)</th><th>Descartados</th><th>Salieron antes de la ventana</th><th class="g3">Llegan a la ventana</th><th class="g3">Salieron dentro</th><th class="g4">Superaron la ventana</th></tr></thead><tbody>'+C.map(x=>fila(x.t.nombre,x.o)).join("")+fila("TOTAL",tot,"tot")+'</tbody></table>';
+ $("tabla").innerHTML='<table><thead><tr><th>Turno</th><th class="g1">1 · Arrancan</th><th class="g2" colspan="3">En curso (todavía no terminaron)</th><th>Descartados</th><th>Salieron antes del 9º distinto</th><th>Salieron después del 9º, antes de la ventana</th><th class="g3">Llegan a la ventana</th><th class="g3">Salieron dentro</th><th class="g4">Superaron la ventana</th></tr></thead><tbody>'+C.map(x=>fila(x.t.nombre,x.o)).join("")+fila("TOTAL",tot,"tot")+'</tbody></table>';
  const o=SEL==="todos"?tot:C.find(x=>x.t.id===SEL).o,curso=o.juntando+o.espera+o.ventana,term=o.arr-curso,lleg=o.acierto+o.supera;
  $("esq").innerHTML=esquema(o);
+ {const ba=o.base,bt=o.baseT,ec=ba-bt,ent=o.acierto+o.supera;
+  $("kpi").innerHTML=`<div><span>Casos que llegan al 9º distinto (base)</span><b>${ba}</b><small>cumplan o no las reglas · ${bt} terminados, ${ec} todavía en curso</small></div><div class="rd"><span>Fallan: el número sale después de la ventana</span><b>${o.supera}</b><small>${pc(o.supera,bt)} de la base terminada · ${pc(o.supera,ent)} de los que entraron a la ventana</small></div><div class="vd"><span>Entran a la ventana</span><b>${ent}</b><small>${pc(ent,bt)} de la base terminada · ${o.acierto} salieron dentro (${pc(o.acierto,ent)})</small></div><div><span>Pasan el sorteo 100 (tope de Y máx)</span><b>${o.p100}</b><small>${pc(o.p100,ba)} de la base · salió después del 100 o todavía no salió</small></div>`}
  $("qt").textContent="· "+(SEL==="todos"?"todos los turnos":TS.find(t=>t.id===SEL).nombre);
- $("graf").innerHTML=barra("Arrancan (terminados + en curso)",o.arr,o.arr,"#1B2A4A",` · en curso ${curso}`)+barra("Terminados",term,o.arr,"#5b6b8c",` · ${pc(term,o.arr)}`)+barra("Descartados",o.desc,o.arr,"#C0392B",` · ${pc(o.desc,term)} de terminados`)+barra("Salieron antes de la ventana",o.antes,o.arr,"#8a6d1f",` · ${pc(o.antes,term)}`)+barra("Llegan a la ventana",lleg,o.arr,"#2E7D4F",` · ${pc(lleg,term)}`)+barra("Salieron dentro de la ventana (acierto)",o.acierto,o.arr,"#2E7D4F",` · ${pc(o.acierto,lleg)} de los que llegaron`)+barra("Superaron la ventana",o.supera,o.arr,"#C0392B",` · ${pc(o.supera,lleg)} de los que llegaron`);
+ $("graf").innerHTML=barra("Arrancan (terminados + en curso)",o.arr,o.arr,"#1B2A4A",` · en curso ${curso}`)+barra("Terminados",term,o.arr,"#5b6b8c",` · ${pc(term,o.arr)}`)+barra("Descartados",o.desc,o.arr,"#C0392B",` · ${pc(o.desc,term)} de terminados`)+barra("Salieron antes del 9º distinto",o.sin9,o.arr,"#8a6d1f",` · ${pc(o.sin9,term)}`)+barra("Salieron después del 9º, antes de la ventana",o.antes,o.arr,"#8a6d1f",` · ${pc(o.antes,term)}`)+barra("Llegan a la ventana",lleg,o.arr,"#2E7D4F",` · ${pc(lleg,term)}`)+barra("Salieron dentro de la ventana (acierto)",o.acierto,o.arr,"#2E7D4F",` · ${pc(o.acierto,lleg)} de los que llegaron`)+barra("Superaron la ventana",o.supera,o.arr,"#C0392B",` · ${pc(o.supera,lleg)} de los que llegaron`);
  $("met").innerHTML="<b>Cómo se lee.</b> Un <b>caso</b> arranca cuando un número pasa a ser el que más hace que no sale (en cada posición, Unidades y Decenas, de cada turno). <b>Descartados</b>: cancelados por una regla de oro antes o durante el análisis. <b>Salieron antes de la ventana</b>: el número salió antes de llegar a Y mín, así que nunca se jugó. <b>Llegan a la ventana</b> = salieron dentro + superaron. Los porcentajes se calculan sobre los casos <b>terminados</b>; los casos <b>en curso</b> se muestran aparte para no mover el %. Con la configuración actual de Entrada a Análisis ("+LN.reglas.ent+") y la regla de 5 distintos "+(LN.reglas.r3?"activada":"apagada")+"."}
 async function cargar(){$("est").textContent="· actualizando…";const r=await LN.load();TS=r.turnos;$("est").textContent="· "+r.msg;
  if(SEL!=="todos"&&!TS.find(t=>t.id===SEL))SEL="todos";bar();render()}
