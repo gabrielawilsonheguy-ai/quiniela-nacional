@@ -100,8 +100,9 @@ function sim(data,i,f){
  let epv=null;
  if(ep&&R&&R.ana)epv=Object.assign({},ep,{A:analizar(serie(ep.L,n-1))});
  const saleEp=cer.find(c=>c.tipo==="salio"&&c.t===n-1)||null;
- for(const K of Object.values(casos)){{let te=n;for(let k=K.L+1;k<n;k++)if(data[k][f][i]===K.dig){te=k;break}const st=new Set();for(let k=K.L+1;k<te;k++)st.add(data[k][f][i]);K.n9=st.size>=9;K.p100=K.n9&&((te<n?te:n-1)-K.L>100);if(K.e==='antes'&&!K.n9)K.e='sin9'}
-  if(K.e==='juntando'){const A=analizar(serie(K.L,n-1));K.nd=A.nd;K.v1=A.v1;K.Yact=A.Yact;K.e=(A.nd<9||A.v1===undefined)?'juntando':(A.Yact>=A.v1?'ventana':'espera')}}
+ for(const K of Object.values(casos)){{let te=n;for(let k=K.L+1;k<n;k++)if(data[k][f][i]===K.dig){te=k;break}const st=new Set();for(let k=K.L+1;k<te;k++)st.add(data[k][f][i]);K.n9=st.size>=9;K.p100=K.n9&&((te<n?te:n-1)-K.L>100);if(K.e==='antes'&&!K.n9)K.e='sin9';K.cerr=te<n;K.Ys=te<n?te-K.L:null;if(K.n9&&te<n&&K.e!=='desc'){if(K.e==='supera'&&K.c&&K.c.A){K.v1=K.c.A.v1;K.v2=K.c.A.v2}else{const A2=analizar(serie(K.L,te-1));K.v1=A2.v1;K.v2=A2.v2}}}
+  if(K.e!=='desc'&&(K.e==='juntando'||(K.e==='antes'&&K.n9))){const tt=K.cerr?K.L+K.Ys-1:n-1;const Ac=analizar(serie(K.L,tt));if(Ac.canc){K.e='desc';K.regla=Ac.canc.regla;K.txt=Ac.canc.txt;K.tarde=true;K.v1=undefined}}
+  if(K.e==='juntando'){const A=analizar(serie(K.L,n-1));K.nd=A.nd;K.v1=A.v1;K.v2=A.v2;K.Yact=A.Yact;K.e=(A.nd<9||A.v1===undefined)?'juntando':(A.Yact>=A.v1?'ventana':'espera')}}
  return{R,ep:epv,cer,saleEp,casos:Object.values(casos)}}
 function seguimiento(data,i,f){return sim(data,i,f).R}
 // Carga de la base (con copia local si no hay conexión)
