@@ -95,14 +95,14 @@ const MOT=[
 function mot(K){const t=K.txt||"";
  if(/^β.*2/.test(t))return"b2";if(/^α.*2/.test(t))return"a2";if(/menor que 1/.test(t))return"b1";
  if(/^8 distintos/.test(t))return"d8";if(/^5 distintos/.test(t))return"d5";return"ot"}
-function nuevo(){const o={arr:0,term:0,curso9:0,curso0:0,espera:0,vent:0,sinYm:0,pas:0,e1:0,e2:0,e3:0,no9:0,desc:0,rg:{},antes:0,sinY:0,lleg:0,acierto:0,supera:0,
+function nuevo(){const o={arr:0,term:0,curso9:0,curso0:0,espera:0,vent:0,sinYm:0,pas:0,e1:0,e2:0,e3:0,no9:0,sin9:0,desc:0,rg:{},antes:0,sinY:0,lleg:0,acierto:0,supera:0,
  bins:{},p100:0,gan:0,per:0,jug:0,posv:Array(11).fill(0),pu:Array(20).fill(0),pd:Array(20).fill(0)};BINS.forEach(b=>o.bins[b.k]=0);return o}
-function contar(turno){const o=nuevo();
+const DET={};let FIL="todos";
+function contar(turno){const o=nuevo();const dt=DET[turno.id]=[];
  for(const f of["u","d"])for(let i=0;i<20;i++){const s=LN.sim(turno.data,i,f);
-  for(const K of s.casos){o.arr++;(f==="u"?o.pu:o.pd)[i]++;if(K.p100)o.p100++;
+  for(const K of s.casos){if(K.e==="sin9"){o.sin9++;continue}o.arr++;{const D=turno.data,ab=(K.e==="juntando"||K.e==="espera"||K.e==="ventana"||(K.e==="supera"&&K.Ys==null));let es=ab?"car":K.e==="desc"?"reg":K.e==="acierto"?"ok":K.e==="supera"?"fa":"an";const fin=(!ab&&K.t!=null&&D[K.t])?D[K.t].k:null;dt.push({tn:turno.nombre,hora:turno.hora,id:turno.id,pos:(f==="u"?"U":"D")+String(i+1).padStart(2,"0"),dig:K.dig,ini:D[K.L+1]?D[K.L+1].k:null,fin,ys:K.cerr?K.Ys:(n=>null)(0),es,det:K.e==="desc"?mot(K):"",v1:K.v1,v2:K.v2})}(f==="u"?o.pu:o.pd)[i]++;if(K.p100)o.p100++;
    const abierto=(K.e==="juntando"||K.e==="espera"||K.e==="ventana");
    if(K.e==="desc"){o.term++;o.desc++;{const m=mot(K);o.rg[m]=(o.rg[m]||0)+1};continue}
-   if(K.e==="sin9"){o.term++;o.no9++;continue}
    if(abierto){if(K.e==="espera"){o.curso9++;o.espera++;const f=K.v1-K.Yact;if(f>10)o.e1++;else if(f>5)o.e2++;else o.e3++}
     else if(K.e==="ventana"){o.curso9++;if(K.v2!=null&&K.Yact>K.v2)o.pas++;else o.vent++}
     else if((K.nd||0)>=9){o.curso9++;o.sinYm++}else o.curso0++;continue}
@@ -134,15 +134,13 @@ function seccionBase(C,tot,o){
 function resumen(o,sel){const curso=o.curso9+o.curso0;
  return `<div class="sec" style="background:transparent;border:0;padding:0 0 4px"><div class="eq"><div class="e0"><span>CICLOS TOTALES</span><b>${nf(o.arr)}</b><small>desde jun 2026</small></div><i>=</i><div class="e1 ${sel==="c"?"sel":""}"><span>CERRADOS</span><b>${nf(o.term)}</b><small>ya terminaron</small></div><i>+</i><div class="e2 ${sel==="e"?"sel":""}"><span>EN CARRERA</span><b>${nf(curso)}</b><small>siguen jugando</small></div></div></div>`}
 function seccionCerrados(o){
- const salio=o.no9+o.antes+o.lleg,base=o.term-o.no9;
+ const salio=o.antes+o.lleg,base=o.term;
  return `<div class="sec"><h2>2 · Ciclos cerrados: cómo terminaron los que ya terminaron</h2><p class="q">Un ciclo se cierra de dos maneras: <b>una regla lo descarta</b> o <b>sale el dígito</b>.</p>
  <div class="eq"><div class="e1 sel"><span>CICLOS CERRADOS</span><b>${nf(o.term)}</b><small>${pc(o.term,o.arr)} de los ciclos totales</small></div></div>
  <div class="lbl">¿Por qué se cerraron?</div>
  ${pila([{n:o.desc,t:"Cerrados POR REGLA (lo descartó una regla)",c:"#B03A2E"},{n:salio,t:"Cerrados porque SALIÓ el dígito",c:"#5b6b8c"}])}
  <div class="lbl">Los cerrados POR REGLA: ¿qué regla fue?</div>
  ${o.desc?pila(MOT.filter(m=>o.rg[m.k]).map(m=>({n:o.rg[m.k],t:m.t,c:m.c}))):'<div class="met">Ningún ciclo descartado.</div>'}
- <div class="lbl">Los cerrados porque SALIÓ el dígito: ¿en qué etapa salió?</div>
- ${pila([{n:o.no9,t:"Antes de llegar a 9/10",c:"#b9b4a4"},{n:o.antes,t:"En 9/10, antes de la ventana (nunca se jugó)",c:"#5b6b8c"},{n:o.acierto,t:"En la ventana: salió DENTRO (acierto)",c:"#2E7D4F"},{n:o.supera,t:"En la ventana: salió DESPUÉS (falla)",c:"#d9774a"}])}
  <div class="dec">De cada <b>100 cerrados</b> que llegaron a 9/10, <b>${pc(o.antes,base)}</b> salieron antes de llegar a la ventana, <b>${pc(o.desc,base)}</b> los descartó una regla y <b>${pc(o.lleg,base)}</b> llegaron a la ventana. ${ch(base)}</div></div>`}
 function seccionCarrera(o){
  const curso=o.curso9+o.curso0;
@@ -194,11 +192,24 @@ function fotos(tot){let F=[];try{F=JSON.parse(localStorage.getItem(FK)||"[]")}ca
  const n=BINS.reduce((s,b)=>s+tot.bins[b.k],0);
  $("foto").onclick=()=>{F.push({f:new Date().toLocaleDateString("es-AR"),arr:tot.arr,term:tot.term,curso:tot.curso9+tot.curso0,lleg:tot.lleg,dentro:tot.bins.in,n,a1:tot.bins.a1,a2:tot.bins.a2,neto:tot.gan-tot.per,r:LN.reglas.ent+(LN.reglas.r3?"+5":"")});try{localStorage.setItem(FK,JSON.stringify(F))}catch(e){}fotos(tot)};
  $("fotos").innerHTML=F.length?`<div class="tw"><table><thead><tr><th>Fecha</th><th>Ciclos</th><th>Terminados</th><th>En carrera</th><th>Llegaron</th><th>Dentro</th><th>1-5 antes</th><th>6-10 antes</th><th>Neto</th><th>Reglas</th></tr></thead><tbody>${F.map(x=>`<tr><td>${x.f}</td><td>${nf(x.arr)}</td><td>${nf(x.term)}</td><td>${nf(x.curso)}</td><td>${x.lleg}</td><td>${x.dentro} de ${x.n}</td><td>${x.a1}</td><td>${x.a2}</td><td>${nf(x.neto)}</td><td>${x.r}</td></tr>`).join("")}</tbody></table></div><div class="met">Las fotos se guardan solo en este aparato.</div>`:'<div class="met">Todavía no hay fotos. Guardá una por mes para ver cómo evoluciona.</div>'}
+function seccionDetalle(C){
+ const ids=SEL==="todos"?C.map(x=>x.t.id):[SEL];let r=[];ids.forEach(id=>r=r.concat(DET[id]||[]));
+ const N={car:"En carrera",reg:"Cerrado por regla",an:"Salió antes de la ventana",ok:"Salió DENTRO (acierto)",fa:"Salió DESPUÉS (falla)"};
+ const cnt={};r.forEach(x=>cnt[x.es]=(cnt[x.es]||0)+1);
+ let v=FIL==="todos"?r:r.filter(x=>x.es===FIL);
+ v=v.slice().sort((a,b)=>(b.fin||b.ini||"").localeCompare(a.fin||a.ini||""));
+ const tot=v.length,vv=v.slice(0,300);
+ const mt={};MOT.forEach(m=>mt[m.k]=m.t);
+ return `<div class="sec"><h2>8 · Detalle: cuáles fueron esos ciclos</h2><p class="q">Una fila por ciclo: en qué lotería y posición, qué dígito, desde qué sorteo, hasta cuál y cómo terminó. Elegí el tipo para filtrar.</p>
+ <div class="lbl">Mostrar:</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${[["todos","Todos ("+r.length+")"]].concat(Object.keys(N).map(k=>[k,N[k]+" ("+(cnt[k]||0)+")"])).map(a=>`<button class="chip${FIL===a[0]?" on":""}" onclick="FIL='${a[0]}';render()" style="padding:5px 10px;border:1px solid #bbb;border-radius:14px;background:${FIL===a[0]?"#1c2a4a":"#fff"};color:${FIL===a[0]?"#fff":"#333"};font-size:12px">${a[1]}</button>`).join("")}</div>
+ <div class="tw"><table><thead><tr><th>Lotería</th><th>Pos.</th><th>Dígito</th><th>Desde</th><th>Hasta</th><th>Sorteos</th><th>Cómo terminó</th><th>Detalle</th></tr></thead><tbody>${vv.map(x=>`<tr><td>${x.tn}</td><td>${x.pos}</td><td><b>${x.dig}</b></td><td>${x.ini?LN.fmt(x.ini):"–"}</td><td>${x.fin?LN.fmt(x.fin):"sigue"}</td><td>${x.ys!=null?x.ys:"–"}</td><td>${N[x.es]}</td><td>${x.det?mt[x.det]||"":(x.v1!=null?"ventana "+x.v1+" a "+x.v2:"")}</td></tr>`).join("")}</tbody></table></div>
+ ${tot>300?`<div class="met">Se muestran los 300 más recientes de ${tot}.</div>`:""}
+ <div class="met">U = Unidades, D = Decenas; el número es la posición del sorteo (01 a 20). "Sorteos" = cuántos sorteos pasaron desde que arrancó hasta que salió.</div></div>`}
 function render(){
  if(!TS.length){$("cont").innerHTML='<div class="vac">No hay datos.</div>';return}
  const C=TS.map(t=>({t,o:contar(t)})),tot=sumar(C.map(x=>x.o));
  const o=SEL==="todos"?tot:C.find(x=>x.t.id===SEL).o;
- $("cont").innerHTML=seccionBase(C,tot,o)+seccionCerrados(o)+seccionCarrera(o)+seccion2(o)+seccion3(o)+seccion4(o)+seccion5(C,tot)+'<div class="met"><b>Cómo se lee.</b> Un <b>ciclo</b> empieza cuando un dígito pasa a ser el que más hace que no sale (en cada posición, Unidades y Decenas, de cada turno) y termina cuando sale. <b>9/10</b> = ya salieron 9 números distintos. Ahí se calculan Y mín e Y máx y se espera la <b>ventana</b> (11 sorteos, de Y mín a Y máx). Los porcentajes se calculan solo sobre ciclos <b>terminados</b>.</div>';
+ $("cont").innerHTML=seccionBase(C,tot,o)+seccionCerrados(o)+seccionCarrera(o)+seccion2(o)+seccion3(o)+seccion4(o)+seccion5(C,tot)+seccionDetalle(C)+'<div class="met"><b>Cómo se lee.</b> Un <b>ciclo</b> empieza cuando un dígito pasa a ser el que más hace que no sale (en cada posición, Unidades y Decenas, de cada turno) y termina cuando sale. <b>9/10</b> = ya salieron 9 números distintos. Ahí se calculan Y mín e Y máx y se espera la <b>ventana</b> (11 sorteos, de Y mín a Y máx). Los porcentajes se calculan solo sobre ciclos <b>terminados</b>.</div>';
  fotos(tot)}
 async function cargar(){$("est").textContent="actualizando…";const r=await LN.load();TS=r.turnos;$("est").textContent=r.msg;
  if(SEL!=="todos"&&!TS.find(t=>t.id===SEL))SEL="todos";bar();render()}
