@@ -97,10 +97,13 @@ function mot(K){const t=K.txt||"";
  if(/^8 distintos/.test(t))return"d8";if(/^5 distintos/.test(t))return"d5";return"ot"}
 function nuevo(){const o={arr:0,term:0,curso9:0,curso0:0,espera:0,vent:0,sinYm:0,pas:0,e1:0,e2:0,e3:0,no9:0,sin9:0,desc:0,rg:{},antes:0,sinY:0,lleg:0,acierto:0,supera:0,
  bins:{},p100:0,gan:0,per:0,jug:0,posv:Array(11).fill(0),pu:Array(20).fill(0),pd:Array(20).fill(0)};BINS.forEach(b=>o.bins[b.k]=0);return o}
+const cifra=p=>p[0]==="U"?"Unidades":"Decenas",ubi=p=>"Posición "+parseInt(p.slice(1),10);
+let ABH=true,ABD=false;
+function sumDias(iso,n){const d=new Date(iso+"T12:00:00");let k=0;while(k<n){d.setDate(d.getDate()+1);if(d.getDay()!==0)k++}return d.toISOString().slice(0,10)}
 const DET={};let FIL="todos";
 function contar(turno){const o=nuevo();const dt=DET[turno.id]=[];
  for(const f of["u","d"])for(let i=0;i<20;i++){const s=LN.sim(turno.data,i,f);
-  for(const K of s.casos){if(K.e==="sin9"){o.sin9++;continue}o.arr++;{const D=turno.data,ab=(K.e==="juntando"||K.e==="espera"||K.e==="ventana"||(K.e==="supera"&&K.Ys==null));let es=ab?"car":K.e==="desc"?"reg":K.e==="acierto"?"ok":K.e==="supera"?"fa":"an";const fin=(!ab&&K.t!=null&&D[K.t])?D[K.t].k:null;dt.push({tn:turno.nombre,hora:turno.hora,id:turno.id,pos:(f==="u"?"U":"D")+String(i+1).padStart(2,"0"),dig:K.dig,ini:D[K.L+1]?D[K.L+1].k:null,fin,ys:K.cerr?K.Ys:(n=>null)(0),es,det:K.e==="desc"?mot(K):"",v1:K.v1,v2:K.v2})}(f==="u"?o.pu:o.pd)[i]++;if(K.p100)o.p100++;
+  for(const K of s.casos){if(K.e==="sin9"){o.sin9++;continue}o.arr++;{const D=turno.data,ab=(K.e==="juntando"||K.e==="espera"||K.e==="ventana"||(K.e==="supera"&&K.Ys==null));let es=ab?"car":K.e==="desc"?"reg":K.e==="acierto"?"ok":K.e==="supera"?"fa":"an";const fin=(!ab&&K.t!=null&&D[K.t])?D[K.t].k:null;dt.push({tn:turno.nombre,hora:turno.hora,id:turno.id,pos:(f==="u"?"U":"D")+String(i+1).padStart(2,"0"),dig:K.dig,ini:D[K.L+1]?D[K.L+1].k:null,fin,ys:K.cerr?K.Ys:(n=>null)(0),es,det:K.e==="desc"?mot(K):"",v1:K.v1,v2:K.v2,ya:K.Yact,e0:K.e,ul:D[D.length-1].k})}(f==="u"?o.pu:o.pd)[i]++;if(K.p100)o.p100++;
    const abierto=(K.e==="juntando"||K.e==="espera"||K.e==="ventana");
    if(K.e==="desc"){o.term++;o.desc++;{const m=mot(K);o.rg[m]=(o.rg[m]||0)+1};continue}
    if(abierto){if(K.e==="espera"){o.curso9++;o.espera++;const f=K.v1-K.Yact;if(f>10)o.e1++;else if(f>5)o.e2++;else o.e3++}
@@ -170,7 +173,7 @@ function seccion2(o){
  <div class="met" style="margin-top:6px">No entran acá: ${nf(o.sinY)} ciclos que salieron antes de que se pudiera calcular Y mín, ${nf(o.desc)} descartados por regla y ${nf(o.curso9)} que todavía están en carrera.</div></div>`}
 function seccion3(o){const n=BINS.reduce((s,b)=>s+o.bins[b.k],0);
  return `<div class="sec"><h2>5 · ¿Con qué frecuencia llegan a la ventana?</h2><p class="q">Y cuántos salen justo antes de empezar (5 o 10 sorteos antes de Y mín).</p>
- <div class="kpi"><div class="ok"><span>Llegan a la ventana</span><b>${nf(o.lleg)}</b><small>${pc(o.lleg,n)} de ${nf(n)} ciclos terminados en 9/10</small></div><div><span>Salen de 1 a 5 sorteos antes</span><b>${nf(o.bins.a1)}</b><small>${pc(o.bins.a1,n)} · entrando 5 antes se ve este grupo</small></div><div><span>Salen de 6 a 10 sorteos antes</span><b>${nf(o.bins.a2)}</b><small>${pc(o.bins.a2,n)}</small></div><div><span>Salen hasta 10 antes (suma)</span><b>${nf(o.bins.a1+o.bins.a2)}</b><small>${pc(o.bins.a1+o.bins.a2,n)}</small></div></div>${ch(n)}</div>`}
+ <div class="kpi"><div class="ok"><span>Llegan a la ventana</span><b>${nf(o.lleg)}</b><small>${pc(o.lleg,n)} de ${nf(n)} ciclos terminados en 9/10</small></div><div><span>Salen de 1 a 5 sorteos antes</span><b>${nf(o.bins.a1)}</b><small>${pc(o.bins.a1,n)} · entrando 5 antes se ve este grupo</small></div><div><span>Salen de 6 a 10 sorteos antes</span><b>${nf(o.bins.a2)}</b><small>${pc(o.bins.a2,n)}</small></div><div><span>Salieron en los 10 sorteos previos a la ventana (1 a 5 + 6 a 10)</span><b>${nf(o.bins.a1+o.bins.a2)}</b><small>${pc(o.bins.a1+o.bins.a2,n)}</small></div></div>${ch(n)}</div>`}
 const STK=LN.STK,PAGA=LN.PAGA;
 function seccion4(o){
  const neto=o.gan-o.per;
@@ -202,14 +205,27 @@ function seccionDetalle(C){
  const mt={};MOT.forEach(m=>mt[m.k]=m.t);
  return `<div class="sec"><h2>8 · Detalle: cuáles fueron esos ciclos</h2><p class="q">Una fila por ciclo: en qué lotería y posición, qué dígito, desde qué sorteo, hasta cuál y cómo terminó. Elegí el tipo para filtrar.</p>
  <div class="lbl">Mostrar:</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${[["todos","Todos ("+r.length+")"]].concat(Object.keys(N).map(k=>[k,N[k]+" ("+(cnt[k]||0)+")"])).map(a=>`<button class="chip${FIL===a[0]?" on":""}" onclick="FIL='${a[0]}';render()" style="padding:5px 10px;border:1px solid #bbb;border-radius:14px;background:${FIL===a[0]?"#1c2a4a":"#fff"};color:${FIL===a[0]?"#fff":"#333"};font-size:12px">${a[1]}</button>`).join("")}</div>
- <div class="tw"><table><thead><tr><th>Lotería</th><th>Pos.</th><th>Dígito</th><th>Desde</th><th>Hasta</th><th>Sorteos</th><th>Cómo terminó</th><th>Detalle</th></tr></thead><tbody>${vv.map(x=>`<tr><td>${x.tn}</td><td>${x.pos}</td><td><b>${x.dig}</b></td><td>${x.ini?LN.fmt(x.ini):"–"}</td><td>${x.fin?LN.fmt(x.fin):"sigue"}</td><td>${x.ys!=null?x.ys:"–"}</td><td>${N[x.es]}</td><td>${x.det?mt[x.det]||"":(x.v1!=null?"ventana "+x.v1+" a "+x.v2:"")}</td></tr>`).join("")}</tbody></table></div>
- ${tot>300?`<div class="met">Se muestran los 300 más recientes de ${tot}.</div>`:""}
- <div class="met">U = Unidades, D = Decenas; el número es la posición del sorteo (01 a 20). "Sorteos" = cuántos sorteos pasaron desde que arrancó hasta que salió.</div></div>`}
+ <details ${ABD?"open":""} ontoggle="ABD=this.open"><summary style="cursor:pointer;font-weight:600;margin:6px 0">Ver / ocultar la tabla (${tot})</summary><div class="tw"><table><thead><tr><th>Lotería</th><th>Cifra</th><th>Ubicación en el sorteo</th><th>Dígito</th><th>Desde</th><th>Hasta</th><th>Sorteos</th><th>Cómo terminó</th><th>Detalle</th></tr></thead><tbody>${vv.map(x=>`<tr><td>${x.tn} ${x.hora||""}</td><td>${cifra(x.pos)}</td><td>${ubi(x.pos)}</td><td><b>${x.dig}</b></td><td>${x.ini?LN.fmt(x.ini):"–"}</td><td>${x.fin?LN.fmt(x.fin):"sigue"}</td><td>${x.ys!=null?x.ys:"–"}</td><td>${N[x.es]}</td><td>${x.det?mt[x.det]||"":(x.v1!=null?"ventana "+x.v1+" a "+x.v2:"")}</td></tr>`).join("")}</tbody></table></div>
+ ${tot>300?`<div class="met">Se muestran los 300 más recientes de ${tot}.</div>`:""}</details>
+ <div class="met">Cifra = si se mira la cifra de las Unidades o la de las Decenas. Ubicación = el puesto del número en el sorteo (1 a 20). "Sorteos" = cuántos sorteos pasaron desde que arrancó hasta que salió.</div></div>`}
+const fvent=x=>{const a=Math.max(x.v1-x.ya,1),b=x.v2-x.ya;if(b<1)return "–";return (x.g===0?"hasta el ":LN.fmt(sumDias(x.ul,a))+" al ")+LN.fmt(sumDias(x.ul,b))};
+function seccionHoy(C){
+ const ids=SEL==="todos"?C.map(x=>x.t.id):[SEL];let r=[];ids.forEach(id=>r=r.concat(DET[id]||[]));
+ const L=[];r.forEach(x=>{if(x.es!=="car"||x.v1==null||x.ya==null)return;
+  if(x.e0==="ventana"&&x.ya<=x.v2)L.push(Object.assign({g:0,f:x.v1-x.ya},x));
+  else if(x.e0==="espera"){const f=x.v1-x.ya;if(f>=1&&f<=10)L.push(Object.assign({g:f<=5?1:2,f},x))}});
+ L.sort((a,b)=>a.g-b.g||a.f-b.f);
+ const c=[0,1,2].map(g=>L.filter(x=>x.g===g).length);
+ const card=(cl,t,n,sm)=>`<div class="${cl}"><span>${t}</span><b>${n}</b><small>${sm}</small></div>`;
+ const est=x=>x.g===0?`<b style="color:#2E7D4F">EN LA VENTANA</b> · sorteo ${x.ya-x.v1+1} de 11`:`faltan <b>${x.f}</b> sorteo${x.f>1?"s":""} para Y mín`;
+ return `<div class="sec" style="border:2px solid #C9A84C"><h2>0 · Estado de hoy: qué está cerca</h2><p class="q">Solo los ciclos en carrera que están en la ventana o a 10 sorteos o menos de Y mín. Los más cercanos primero.</p>
+ <div class="kpi">${card("ok","En la ventana AHORA",c[0],"se pueden jugar hoy")}${card("","A 1 a 5 sorteos de Y mín",c[1],"por empezar")}${card("","A 6 a 10 sorteos de Y mín",c[2],"se acercan")}</div>
+ ${L.length?`<details ${ABH?"open":""} ontoggle="ABH=this.open"><summary style="cursor:pointer;font-weight:600;margin:6px 0">Ver / ocultar la lista de ciclos</summary><div class="tw"><table><thead><tr><th>Lotería</th><th>Cifra</th><th>Ubicación en el sorteo</th><th>Dígito</th><th>Arrancó</th><th>Sorteo actual del ciclo</th><th>Dónde está</th><th>Ventana (sorteos del ciclo)</th></tr></thead><tbody>${L.slice(0,25).map(x=>`<tr${x.g===0?' style="background:#e8f4ec"':""}><td>${x.tn} ${x.hora||""}</td><td>${cifra(x.pos)}</td><td>${ubi(x.pos)}</td><td><b>${x.dig}</b></td><td>${x.ini?LN.fmt(x.ini):"–"}</td><td>${x.ya}</td><td>${est(x)}</td><td>${x.v1} a ${x.v2}</td></tr>`).join("")}</tbody></table></div>${L.length>25?`<div class="met">Se muestran los 25 más cercanos de ${L.length}.</div>`:""}</details>`:'<div class="met">Hoy no hay ningún ciclo en la ventana ni a 10 sorteos de Y mín.</div>'}</div>`}
 function render(){
  if(!TS.length){$("cont").innerHTML='<div class="vac">No hay datos.</div>';return}
  const C=TS.map(t=>({t,o:contar(t)})),tot=sumar(C.map(x=>x.o));
  const o=SEL==="todos"?tot:C.find(x=>x.t.id===SEL).o;
- $("cont").innerHTML=seccionBase(C,tot,o)+seccionCerrados(o)+seccionCarrera(o)+seccion2(o)+seccion3(o)+seccion4(o)+seccion5(C,tot)+seccionDetalle(C)+'<div class="met"><b>Cómo se lee.</b> Un <b>ciclo</b> empieza cuando un dígito pasa a ser el que más hace que no sale (en cada posición, Unidades y Decenas, de cada turno) y termina cuando sale. <b>9/10</b> = ya salieron 9 números distintos. Ahí se calculan Y mín e Y máx y se espera la <b>ventana</b> (11 sorteos, de Y mín a Y máx). Los porcentajes se calculan solo sobre ciclos <b>terminados</b>.</div>';
+ $("cont").innerHTML=seccionHoy(C)+seccionBase(C,tot,o)+seccionCerrados(o)+seccionCarrera(o)+seccion2(o)+seccion3(o)+seccion4(o)+seccion5(C,tot)+seccionDetalle(C)+'<div class="met"><b>Cómo se lee.</b> Un <b>ciclo</b> empieza cuando un dígito pasa a ser el que más hace que no sale (en cada posición, Unidades y Decenas, de cada turno) y termina cuando sale. <b>9/10</b> = ya salieron 9 números distintos. Ahí se calculan Y mín e Y máx y se espera la <b>ventana</b> (11 sorteos, de Y mín a Y máx). Los porcentajes se calculan solo sobre ciclos <b>terminados</b>.</div>';
  fotos(tot)}
 async function cargar(){$("est").textContent="actualizando…";const r=await LN.load();TS=r.turnos;$("est").textContent=r.msg;
  if(SEL!=="todos"&&!TS.find(t=>t.id===SEL))SEL="todos";bar();render()}
