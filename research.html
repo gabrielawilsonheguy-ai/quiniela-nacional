@@ -171,9 +171,9 @@ function seccion2(o){
  <div class="lbl">Zoom: solo los que están cerca de la ventana (sin los que salen a más de 10 sorteos antes)</div>${hist(o,zoom,200)}
  <div class="dec"><b>Exacto (dentro de la ventana):</b> ${nf(o.bins.in)} de ${nf(n)} (${pc(o.bins.in,n)}).<br><b>Cerquita (hasta 5 sorteos antes o después, o dentro):</b> ${nf(cerca)} de ${nf(n)} (${pc(cerca,n)}).<br><b>Hasta 10 sorteos antes o después, o dentro:</b> ${nf(cerca10)} de ${nf(n)} (${pc(cerca10,n)}). ${ch(n)}</div>
  <div class="met" style="margin-top:6px">No entran acá: ${nf(o.sinY)} ciclos que salieron antes de que se pudiera calcular Y mín, ${nf(o.desc)} descartados por regla y ${nf(o.curso9)} que todavía están en carrera.</div></div>`}
-function seccion3(o){const n=BINS.reduce((s,b)=>s+o.bins[b.k],0);
+function seccion3(o){const n=o.term;
  return `<div class="sec"><h2>5 · ¿Con qué frecuencia llegan a la ventana?</h2><p class="q">Y cuántos salen justo antes de empezar (5 o 10 sorteos antes de Y mín).</p>
- <div class="kpi"><div class="ok"><span>Llegan a la ventana</span><b>${nf(o.lleg)}</b><small>${pc(o.lleg,n)} de ${nf(n)} ciclos terminados en 9/10</small></div><div><span>Salen de 1 a 5 sorteos antes</span><b>${nf(o.bins.a1)}</b><small>${pc(o.bins.a1,n)} · entrando 5 antes se ve este grupo</small></div><div><span>Salen de 6 a 10 sorteos antes</span><b>${nf(o.bins.a2)}</b><small>${pc(o.bins.a2,n)}</small></div><div><span>Salieron en los 10 sorteos previos a la ventana (1 a 5 + 6 a 10)</span><b>${nf(o.bins.a1+o.bins.a2)}</b><small>${pc(o.bins.a1+o.bins.a2,n)}</small></div></div>${ch(n)}</div>`}
+ <div class="kpi"><div class="ok"><span>Llegan a la ventana</span><b>${nf(o.lleg)}</b><small>${pc(o.lleg,n)} de ${nf(n)} ciclos cerrados</small></div><div><span>Salen de 1 a 5 sorteos antes</span><b>${nf(o.bins.a1)}</b><small>${pc(o.bins.a1,n)} de ${nf(n)} ciclos cerrados · entrando 5 antes se ve este grupo</small></div><div><span>Salen de 6 a 10 sorteos antes</span><b>${nf(o.bins.a2)}</b><small>${pc(o.bins.a2,n)} de ${nf(n)} ciclos cerrados</small></div></div>${ch(n)}</div>`}
 const STK=LN.STK,PAGA=LN.PAGA;
 function seccion4(o){
  const neto=o.gan-o.per;
