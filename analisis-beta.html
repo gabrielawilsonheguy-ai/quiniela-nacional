@@ -227,13 +227,23 @@ function render1(f){
    return `<tr><td class="pos" style="font-size:13px;padding:6px 8px">${c.T.nombre}</td><td class="pos">${P(c.pos)}</td><td class="dg">${c.dig}</td><td class="t">${fmt(c.arr)}</td><td class="t">${fmt(c.fecha)}</td><td class="t ${cl}">${res}</td><td class="t">${aT}</td><td class="mot">${mot}</td></tr>`}).join("")+'</tbody></table>'}
 
 function apC(c){const A=c.A;return c.tipo==="canc"?LN.apuesta(A,c.Yc,null):c.tipo==="ventana"?LN.apuesta(A,A.v2,null):LN.apuesta(A,c.Ys,c.Ys)}
+function cuando(T){
+ const last=T.data[T.data.length-1].k,ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+ const c=new Date(last+"T12:00:00");do{c.setDate(c.getDate()+1)}while(c.getDay()===0);
+ const now=new Date(),hoy=ymd(now),cs=ymd(c),hm=(T.hora||"").split(":"),hh=+hm[0]||0,mm=+hm[1]||0,pas=now.getHours()*60+now.getMinutes()>=hh*60+mm;
+ const mana=new Date(now);mana.setDate(mana.getDate()+1);
+ const dn=c.toLocaleDateString("es-AR",{weekday:"long"});
+ if(cs===hoy)return "hoy a las "+T.hora+(pas?" (el resultado todavía no está cargado)":"");
+ if(cs===ymd(mana))return "mañana "+dn+" a las "+T.hora;
+ if(cs<hoy)return "el del "+fc(cs)+" a las "+T.hora+" (faltan cargar sorteos)";
+ return dn+" "+fc(cs)+" a las "+T.hora}
 function pintar(){
  $("base").textContent=$("est").textContent;
  const ET=[["a3","8/10 o menos","juntando datos"],["a2","Más de 10 sorteos antes de Y mín",""],["a1","De 6 a 10 sorteos antes de Y mín",""],["a0","De 1 a 5 sorteos antes de Y mín",""],["v","En la ventana (entre Y mín y Y máx)",""],["p","Pasó Y máx y todavía no salió",""]];
  const key=r=>{const A=r.A;if(A.v1===undefined)return"a3";const nx=A.Yact+1;if(nx<A.v1){const f=A.v1-nx;return f>9?"a2":f>4?"a1":"a0"}if(nx<=A.v2)return"v";return"p"};
  const L=ENJ.filter(r=>!r.salio).map(r=>({r,k:key(r)}));
  $("ncar").textContent="· "+L.length;
- $("resumen").innerHTML=ET.map(e=>{const n=L.filter(x=>x.k===e[0]).length;return `<div class="${e[0]==="v"&&n?"ok":""}"><span>${e[1]}</span><b>${n}</b></div>`}).join("");
+ $("resumen").innerHTML=ET.map(e=>{const n=L.filter(x=>x.k===e[0]).length;return e[0]==="a3"&&!n?"":`<div class="${e[0]==="v"&&n?"ok":""}"><span>${e[1]}</span><b>${n}</b></div>`}).join("");
  if(!L.length){$("juego").innerHTML='<div class="vac" style="background:#fff;border-radius:10px">Hoy no hay ningún ciclo en carrera (se entra '+(LN.reglas.ent==='A'?'al llegar a '+LIM+' sorteos sin salir':'5 sorteos antes de Y mín')+').</div>';return}
  const card=r=>{const A=r.A,cif=r.f==="u"?"Unidades":"Decenas",tit=`${cif} · Posición ${r.pos+1} · Dígito ${r.dig}`,sub=`${r.T.nombre} ${r.T.hora||""} · arrancó ${fmt(r.arr)}`;
   let cls="cd",fr="",bar="",ch="",nt="";
@@ -241,8 +251,8 @@ function pintar(){
   else{const nx=A.Yact+1;
    if(nx>A.v2){cls+=" fin";fr=`⌛ <b>Pasó Y máx.</b> La ventana fue del ${A.v1} al ${A.v2}; hoy va el sorteo ${A.Yact} y el ${r.dig} todavía no salió.`}
    else{const mx=Math.max(A.v2,A.Yact),pc=x=>(100*x/mx).toFixed(1)+"%";
-    if(nx>=A.v1){cls+=" v";fr=`🟢 <b>EN LA VENTANA.</b> Se juega el sorteo <b>${nx}</b> (el ${nx-A.v1+1} de ${A.v2-A.v1+1}): <b>$ ${mon(LN.stakeY(A,nx))}</b>. Ya apostado: $ ${mon(LN.apuesta(A,A.Yact,null).tot||0)}.`}
-    else{const f=A.v1-nx;fr=`⏳ <b>Esperando.</b> Hoy va el sorteo <b>${A.Yact}</b>. La ventana empieza en el <b>${A.v1}</b> (${f===0?"es el próximo sorteo":"faltan "+f+" sorteo"+(f>1?"s":"")+" antes de empezar"}) y termina en el <b>${A.v2}</b>.`}
+    if(nx>=A.v1){cls+=" v";fr=`🟢 <b>EN LA VENTANA.</b> Se juega el sorteo <b>${nx}</b> (el ${nx-A.v1+1} de ${A.v2-A.v1+1}): <b>$ ${mon(LN.stakeY(A,nx))}</b>, <b>${cuando(r.T)}</b>. Ya apostado: $ ${mon(LN.apuesta(A,A.Yact,null).tot||0)}.`}
+    else{const f=A.v1-nx;fr=`⏳ <b>Esperando.</b> Hoy va el sorteo <b>${A.Yact}</b>. La ventana empieza en el <b>${A.v1}</b> (${f===0?"es el próximo sorteo: "+cuando(r.T):"faltan "+f+" sorteo"+(f>1?"s":"")+" antes de empezar"}) y termina en el <b>${A.v2}</b>.`}
     bar=`<div class="br"><i style="left:0;width:${pc(A.Yact)};background:#9fb0d6"></i><i style="left:${pc(A.v1-1)};width:${(100*(A.v2-A.v1+1)/mx).toFixed(1)}%;background:#C9A84C;opacity:.85"></i></div><div class="sc"><span>0</span><span>hoy ${A.Yact}</span><span>ventana ${A.v1} a ${A.v2}</span></div>`;
     const sh=[];for(let y=A.v1;y<=A.v2;y++)sh.push(y);const pn=Math.max(nx,A.v1);
     ch=`<div class="nt">Qué se juega en cada sorteo de la ventana:</div><div class="ap">`+sh.map(y=>`<div class="${y===pn?"nx":(y<nx?"pa":"")}">${y} · $ ${mon(LN.stakeY(A,y))}${y===pn?"<br><small>"+(nx<A.v1?"empieza":"próximo")+"</small>":""}</div>`).join("")+`</div>`;
