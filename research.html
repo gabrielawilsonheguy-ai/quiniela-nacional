@@ -225,7 +225,7 @@ function render(){
  if(!TS.length){$("cont").innerHTML='<div class="vac">No hay datos.</div>';return}
  const C=TS.map(t=>({t,o:contar(t)})),tot=sumar(C.map(x=>x.o));
  const o=SEL==="todos"?tot:C.find(x=>x.t.id===SEL).o;
- $("cont").innerHTML=seccionHoy(C)+seccionBase(C,tot,o)+seccionCerrados(o)+seccionCarrera(o)+seccion2(o)+seccion3(o)+seccion4(o)+seccion5(C,tot)+seccionDetalle(C)+'<div class="met"><b>Cómo se lee.</b> Un <b>ciclo</b> empieza cuando un dígito pasa a ser el que más hace que no sale (en cada posición, Unidades y Decenas, de cada turno) y termina cuando sale. <b>9/10</b> = ya salieron 9 números distintos. Ahí se calculan Y mín e Y máx y se espera la <b>ventana</b> (11 sorteos, de Y mín a Y máx). Los porcentajes se calculan solo sobre ciclos <b>terminados</b>.</div>';
+ $("cont").innerHTML=seccionBase(C,tot,o)+seccionCerrados(o)+seccionCarrera(o)+seccion2(o)+seccion3(o)+seccion4(o)+seccion5(C,tot)+seccionDetalle(C)+'<div class="met"><b>Cómo se lee.</b> Un <b>ciclo</b> empieza cuando un dígito pasa a ser el que más hace que no sale (en cada posición, Unidades y Decenas, de cada turno) y termina cuando sale. <b>9/10</b> = ya salieron 9 números distintos. Ahí se calculan Y mín e Y máx y se espera la <b>ventana</b> (11 sorteos, de Y mín a Y máx). Los porcentajes se calculan solo sobre ciclos <b>terminados</b>.</div>';
  fotos(tot)}
 async function cargar(){$("est").textContent="actualizando…";const r=await LN.load();TS=r.turnos;$("est").textContent=r.msg;
  if(SEL!=="todos"&&!TS.find(t=>t.id===SEL))SEL="todos";bar();render()}

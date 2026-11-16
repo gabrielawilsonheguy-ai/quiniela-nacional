@@ -1,6 +1,6 @@
 // Núcleo de Quiniela Nacional: 5 turnos, método α y β (Manual BETA). Una sola definición para las 3 apps.
 (function(){
-const LIM=67;
+const LIM=60;
 const RK="lw:nac-reglas-v1",reglas={r3:false,ent:"B"};
 try{const x=JSON.parse(localStorage.getItem(RK)||"null");if(x&&typeof x.r3==="boolean")reglas.r3=x.r3;if(x&&(x.ent==="A"||x.ent==="B"))reglas.ent=x.ent}catch(e){}
 function setR3(v){reglas.r3=!!v;try{localStorage.setItem(RK,JSON.stringify(reglas))}catch(e){}}
