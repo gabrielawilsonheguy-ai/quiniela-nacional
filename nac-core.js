@@ -94,7 +94,7 @@ function sim(data,i,f){
    if(seen<10||dist.size<9){R.estado="Búsqueda "+dist.size+"/10";R.proc=false}
    else if(ep&&ep.dig===c){R.estado="Análisis";R.ana=true}
    else{R.estado="En proceso "+dist.size+"/10";R.proc=true}
-   if(seen>=10&&dist.size>=9){const A=analizar(serie(L,n-1));R.cancR=!!A.canc;
+   if(seen>=10&&dist.size>=9){const A=analizar(serie(L,n-1));R.cancR=!!A.canc;if(R.cancR){R.estado="Cancelado por regla";R.proc=false;R.ana=false}
     if(!A.canc&&A.v1!==undefined){R.v1=A.v1;R.v2=A.v2;R.Y=A.Y;
      if(R.proc&&reglas.ent==="B"){const fa=A.v1-ANTES-R.gap;if(fa>0)R.estado="Entra en "+fa+" sort."}}}}}
  let epv=null;

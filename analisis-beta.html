@@ -42,6 +42,15 @@ td.f.rj{background:#FBD5D0;color:var(--red)}td.f.ok{background:#CDEBD6;color:#1F
 .met{margin-top:10px;font-size:12px;color:#444;line-height:1.55}
 
 .sec2{margin-top:22px}
+.rs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:6px 0 4px}.rs div{background:#fff;border:2px solid #C9A84C;border-radius:12px;padding:9px 12px}.rs div.ok{border-color:#2E7D4F}.rs div.ro{border-color:#B03A2E}
+.rs span{display:block;font-size:13px;font-weight:700}.rs b{display:block;font:700 28px Georgia,serif}.rs .ok b{color:#2E7D4F}.rs .ro b{color:#B03A2E}.rs small{font-size:12px;color:#555}
+.h2{font:700 19px Georgia,serif;color:#1B2A4A;margin:16px 0 2px}.qq{font-size:13px;color:#555;margin:0 0 8px}
+.cd{background:#fff;border:2px solid #C9A84C;border-radius:12px;padding:12px 14px;margin-bottom:10px}.cd.v{border-color:#2E7D4F;background:#eef7f1}.cd.fin{border-color:#8a93a8;background:#f4f5f8}
+.cd .tp{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}.cd .tp b{font-size:16px}.cd .tp em{font-style:normal;font-size:12px;color:#555}
+.cd .fr{font-size:15px;margin:6px 0}.cd .br{height:16px;border-radius:8px;background:#cdd6ea;position:relative;overflow:hidden;margin:8px 0 3px}.cd .br i{position:absolute;top:0;bottom:0}
+.cd .sc{display:flex;justify-content:space-between;font-size:11px;color:#555}.cd .ap{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.cd .ap div{border:1px solid #bbb;border-radius:7px;padding:3px 8px;font-size:12px;text-align:center;background:#fff}.cd .ap .nx{background:#C9A84C;color:#fff;font-weight:700;border-color:#C9A84C}.cd .ap .pa{opacity:.45}
+.cd .nt{font-size:12.5px;color:#555;margin-top:7px}details.dt{margin:14px 0}details.dt>summary{cursor:pointer;font-weight:700;background:#F5F3EE;border:1px solid #D8D4C8;border-radius:10px;padding:10px 14px}
+
 .sw{display:inline-block;margin:6px 0 2px;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}.sw input{vertical-align:-2px;margin-right:6px}
 td.jg1{min-width:46px;padding:3px 3px;font-size:15px;font-weight:700;background:#fff;color:#555}
 td.jg1 small{display:block;font:10px -apple-system,Segoe UI,Roboto,sans-serif;font-weight:400;line-height:1.2}
@@ -63,23 +72,28 @@ td.jg1{min-width:56px}
 .tur .bd{display:inline-block;margin-left:6px;background:#F4A340;color:#4A2300;border-radius:9px;padding:0 6px;font:700 11px sans-serif;font-style:normal}
 .btn.on{background:var(--navy);color:#fff}
 </style></head><body>
-<header><div><h1>β ANÁLISIS Beta · Quiniela Nacional</h1><small>filas (Unidades y Decenas) cuyo dígito esperado entró a Análisis (5 sorteos antes de Y mín, o 60 sorteos sin salir, según el selector) · método α y β (Manual BETA)</small></div><a class="btn" href="jugadas.html">$ Jugadas</a><a class="btn" href="index.html" style="margin-left:6px">‹ Inicio</a></header>
+<header><div><h1>β ANÁLISIS Beta · Quiniela Nacional</h1><small>Ciclos en carrera · entra a Análisis según el selector (5 sorteos antes de Y mín, o 60 sorteos sin salir) · método α y β (Manual BETA)</small></div><a class="btn" href="jugadas.html">$ Jugadas</a><a class="btn" href="index.html" style="margin-left:6px">‹ Inicio</a></header>
 <div class="wrap">
  <div class="tur" id="tur"></div>
  <div class="sec" id="tit">QUINIELA NACIONAL</div>
  <label class="sw">Entrada a Análisis: <select id="ent"><option value="B">5 sorteos antes de Y mín (normal)</option><option value="A">60 sorteos sin salir</option></select></label>
  <label class="sw"><input type="checkbox" id="r3"> Aplicar regla de oro 3 con 5 (cancela si los <b>5 primeros sorteos</b> son 5 dígitos distintos). Si los <b>8 primeros</b> son 8 distintos, se anula siempre</label>
+ <div class="h2">Ciclos en carrera <span id="ncar"></span></div><p class="qq">Los que ya entraron a Análisis y todavía no cerraron. En orden de etapas, de más lejos a más cerca. <span id="base"></span></p><div class="rs" id="resumen"></div>
+ <div id="juego"></div>
+ <details class="dt"><summary>Detalles técnicos: tabla completa, α, β, cálculo por fila y gráfico</summary>
  <div class="sub">Unidades <span id="est"></span></div>
  <div class="box"><div id="lista-u"></div></div>
  <div id="calc-u"></div>
- <div class="sec2"><div class="sub" style="font-size:14px">Análisis cerrados · Unidades</div>
+ <div class="sec2" style="display:none"><div class="sub" style="font-size:14px">Análisis cerrados · Unidades</div>
  <div class="box"><div id="cerr-u"></div></div></div>
  <div style="height:26px"></div>
  <div class="sub">Decenas</div>
  <div class="box"><div id="lista-d"></div></div>
  <div id="calc-d"></div>
- <div class="sec2"><div class="sub" style="font-size:14px">Análisis cerrados · Decenas</div>
+ <div class="sec2" style="display:none"><div class="sub" style="font-size:14px">Análisis cerrados · Decenas</div>
  <div class="box"><div id="cerr-d"></div></div></div>
+ </details>
+ <div class="met" style="margin-top:14px">Esta pantalla muestra solo los ciclos en carrera. Lo ganado y el detalle de cada ciclo cerrado están en <a href="research.html">Research</a> (bloque 8, Detalle).</div>
  <div class="met"><b>Método BETA.</b> Arranque = sorteo siguiente a la última salida del dígito más atrasado (Y = 1). Cada dígito distinto nuevo ocupa el lugar X y tiene α = log(Y) ÷ log(X); el 1º tiene α = 1 (el 9º también por log). β N = log(sorteo del último repetido antes del nuevo distinto) ÷ log(N); solo existe si hubo repetidos. Se cancela si algún α o algún β llega a 2 o más (confirmado por Luis); regla 3 opcional con el interruptor. Al salir el 9º distinto: β máx = el mayor β entre β 2 y β 8; β virtual 8 = (2 − β máx) ÷ β máx + β máx; β virtual 9 = (2 − β virtual 8) ÷ β virtual 8 + β virtual 8; β virtual 10 = (2 − β virtual 9) ÷ β virtual 9 + β virtual 9; Y máx = 10<sup>β virtual 10</sup> redondeado hacia arriba. Ventana de juego: 11 sorteos, del Y mín (= Y máx − 10) al Y máx; el Y máx es el último sorteo que se juega. Reglas de oro: algún α ≥ 2 o algún β ≥ 2, y 8 distintos seguidos al principio (la de 5 es opcional). Paga 7 veces lo apostado. Esta app es independiente del Análisis actual.</div>
 </div>
 <script src="nac-core.js"></script>
@@ -169,13 +183,15 @@ function grafico(r){const A=r.A,u=9,ml=50,mt=24,mr=210,mb=86;
  <circle cx="${ml+9}" cy="${ly+26}" r="3.6" fill="#C9A84C" stroke="#1B2A4A"/><text x="${ml+22}" y="${ly+29}">α (sorteo en que sale cada distinto)</text>
  <circle cx="${ml+9}" cy="${ly+39}" r="3.6" fill="#fff" stroke="#B03A2E" stroke-width="1.6"/><text x="${ml+22}" y="${ly+42}">β (sorteo antes del cambio)</text><rect x="${ml+1}" y="${ly+48}" width="17" height="9" fill="#C9A84C" fill-opacity="0.35" stroke="#a8861f"/><text x="${ml+22}" y="${ly+56}">ventana de juego (Y mín a Y máx, 11 sorteos)</text></g></svg>`;
  return s}
-function render(){render1("u");render1("d")}
+let ENJ=[],SUM=[];
+function render(){ENJ=[];SUM=[];render1("u");render1("d");pintar()}
 function render1(f){
  const R=[],Cer=[];
  for(const T of (SEL==="todos"?TS:TS.filter(t=>t.id===SEL)))for(let i=0;i<20;i++){const s=LN.sim(T.data,i,f);
   if(s.ep)R.push({T,pos:i,dig:s.ep.dig,A:s.ep.A,arr:s.ep.arr,L:s.ep.L});
   else if(s.saleEp)R.push({T,pos:i,dig:s.saleEp.dig,A:s.saleEp.A,arr:s.saleEp.arr,L:s.saleEp.L,salio:true,Ys:s.saleEp.Ys,dentro:s.saleEp.dentro});
   s.cer.forEach(c=>Cer.push(Object.assign({T},c)))}
+ R.forEach(r=>ENJ.push(Object.assign({f},r)));Cer.forEach(c=>SUM.push(c));
  if(!R.length){$("lista-"+f).innerHTML='<div class="vac">Ninguna fila está en análisis por ahora (se entra '+(LN.reglas.ent==='A'?'al llegar a '+LIM+' sorteos sin salir':'5 sorteos antes de Y mín, cuando ya salieron los 9 distintos')+').</div>';$("calc-"+f).innerHTML=""}
  else{
  let h='<table><thead><tr><th class="p">Turno</th><th class="p">Pos</th><th>Dígito<br>faltante</th>';
@@ -209,6 +225,33 @@ function render1(f){
    if(c.tipo!=="salio")mot+=c.post?` Después salió el ${c.dig} en el sorteo ${c.post.Ys} (${fmt(c.post.fecha)})${A.v2!==undefined?(c.post.Ys>A.v2?", fuera de la ventana":""):""} — dato para estadística.`:" Todavía no salió el "+c.dig+".";
    const aT=ap.tot?("$ "+mon(ap.tot)+(ap.hit?` · premio $ ${mon(ap.premio)} · neto $ ${mon(ap.neto)}`:" · sin premio")):"—";
    return `<tr><td class="pos" style="font-size:13px;padding:6px 8px">${c.T.nombre}</td><td class="pos">${P(c.pos)}</td><td class="dg">${c.dig}</td><td class="t">${fmt(c.arr)}</td><td class="t">${fmt(c.fecha)}</td><td class="t ${cl}">${res}</td><td class="t">${aT}</td><td class="mot">${mot}</td></tr>`}).join("")+'</tbody></table>'}
+
+function apC(c){const A=c.A;return c.tipo==="canc"?LN.apuesta(A,c.Yc,null):c.tipo==="ventana"?LN.apuesta(A,A.v2,null):LN.apuesta(A,c.Ys,c.Ys)}
+function pintar(){
+ $("base").textContent=$("est").textContent;
+ const ET=[["a3","8/10 o menos","juntando datos"],["a2","Más de 10 sorteos antes de Y mín",""],["a1","De 6 a 10 sorteos antes de Y mín",""],["a0","De 1 a 5 sorteos antes de Y mín",""],["v","En la ventana (entre Y mín y Y máx)",""],["p","Pasó Y máx y todavía no salió",""]];
+ const key=r=>{const A=r.A;if(A.v1===undefined)return"a3";const nx=A.Yact+1;if(nx<A.v1){const f=A.v1-nx;return f>9?"a2":f>4?"a1":"a0"}if(nx<=A.v2)return"v";return"p"};
+ const L=ENJ.filter(r=>!r.salio).map(r=>({r,k:key(r)}));
+ $("ncar").textContent="· "+L.length;
+ $("resumen").innerHTML=ET.map(e=>{const n=L.filter(x=>x.k===e[0]).length;return `<div class="${e[0]==="v"&&n?"ok":""}"><span>${e[1]}</span><b>${n}</b></div>`}).join("");
+ if(!L.length){$("juego").innerHTML='<div class="vac" style="background:#fff;border-radius:10px">Hoy no hay ningún ciclo en carrera (se entra '+(LN.reglas.ent==='A'?'al llegar a '+LIM+' sorteos sin salir':'5 sorteos antes de Y mín')+').</div>';return}
+ const card=r=>{const A=r.A,cif=r.f==="u"?"Unidades":"Decenas",tit=`${cif} · Posición ${r.pos+1} · Dígito ${r.dig}`,sub=`${r.T.nombre} ${r.T.hora||""} · arrancó ${fmt(r.arr)}`;
+  let cls="cd",fr="",bar="",ch="",nt="";
+  if(A.v1===undefined){fr=`🔎 <b>Juntando datos.</b> Hoy va el sorteo ${A.Yact}. Salieron ${A.nd} de 9 distintos; todavía no hay ventana.`}
+  else{const nx=A.Yact+1;
+   if(nx>A.v2){cls+=" fin";fr=`⌛ <b>Pasó Y máx.</b> La ventana fue del ${A.v1} al ${A.v2}; hoy va el sorteo ${A.Yact} y el ${r.dig} todavía no salió.`}
+   else{const mx=Math.max(A.v2,A.Yact),pc=x=>(100*x/mx).toFixed(1)+"%";
+    if(nx>=A.v1){cls+=" v";fr=`🟢 <b>EN LA VENTANA.</b> Se juega el sorteo <b>${nx}</b> (el ${nx-A.v1+1} de ${A.v2-A.v1+1}): <b>$ ${mon(LN.stakeY(A,nx))}</b>. Ya apostado: $ ${mon(LN.apuesta(A,A.Yact,null).tot||0)}.`}
+    else{const f=A.v1-nx;fr=`⏳ <b>Esperando.</b> Hoy va el sorteo <b>${A.Yact}</b>. La ventana empieza en el <b>${A.v1}</b> (${f===0?"es el próximo sorteo":"faltan "+f+" sorteo"+(f>1?"s":"")+" antes de empezar"}) y termina en el <b>${A.v2}</b>.`}
+    bar=`<div class="br"><i style="left:0;width:${pc(A.Yact)};background:#9fb0d6"></i><i style="left:${pc(A.v1-1)};width:${(100*(A.v2-A.v1+1)/mx).toFixed(1)}%;background:#C9A84C;opacity:.85"></i></div><div class="sc"><span>0</span><span>hoy ${A.Yact}</span><span>ventana ${A.v1} a ${A.v2}</span></div>`;
+    const sh=[];for(let y=A.v1;y<=A.v2;y++)sh.push(y);const pn=Math.max(nx,A.v1);
+    ch=`<div class="nt">Qué se juega en cada sorteo de la ventana:</div><div class="ap">`+sh.map(y=>`<div class="${y===pn?"nx":(y<nx?"pa":"")}">${y} · $ ${mon(LN.stakeY(A,y))}${y===pn?"<br><small>"+(nx<A.v1?"empieza":"próximo")+"</small>":""}</div>`).join("")+`</div>`;
+    nt=`<div class="nt">Si no sale en toda la ventana se pierden $ ${mon(LN.apuesta(A,A.v2,null).tot||0)}.</div>`}}
+  return `<div class="${cls}"><div class="tp"><b>${tit}</b><em>${sub}</em></div><div class="fr">${fr}</div>${bar}${ch}${nt}</div>`};
+ let h="";
+ for(const e of ET.slice().reverse()){const g=L.filter(x=>x.k===e[0]).sort((a,b)=>b.r.A.Yact-a.r.A.Yact);if(!g.length)continue;
+  h+=`<div class="h2" style="font-size:16px;margin-top:14px">${e[1]} <span style="font-weight:400;color:#555">· ${g.length}</span></div>`+g.map(x=>card(x.r)).join("")}
+ $("juego").innerHTML=h}
 function elegir(){
  const T=TS.find(t=>t.id===SEL);
  $("tit").textContent="QUINIELA NACIONAL · "+(T?T.nombre.toUpperCase()+" "+T.hora:"TODOS LOS TURNOS");
